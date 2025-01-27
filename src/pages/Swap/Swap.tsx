@@ -1,42 +1,65 @@
 /**
  * @file src/pages/Swap/Swap.tsx
- * Updated Date: 2025-01-27 05:52:12
+ * Updated Date: 2025-01-27 21:11:56
  * Author: jake1318
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { SuiEventFilter } from "@mysten/sui.js/client";
-import { DeepBookService } from "../../services/deepbook";
 import {
-  Pool,
-  TokenBalance,
-  TokenInfo,
-  SwapParams,
-  ApiResponse,
-  MarketPrice,
-} from "../../types/deepbook";
+  SuiClient,
+  PaginatedObjectsResponse,
+  SuiTransactionBlockResponse,
+} from "@mysten/sui.js/client";
+import { DeepBookService, DEEPBOOK_PACKAGE_ID } from "../../services/deepbook";
 import "./Swap.css";
 
-// Constants
-const DEEPBOOK_PACKAGE_ID =
-  process.env.VITE_DEEPBOOK_PACKAGE_ID ||
-  "0xdee9000000000000000000000000000000000000000000000000000000000000";
-const CUSTODIAN_ID =
-  process.env.VITE_CUSTODIAN_ID ||
-  "0x38fe43dd9aaff19d475ddb5f6d4657243b1428bbdf0ff797bdc1dac69986c093";
-const DEFAULT_DECIMALS = 9;
-const REFRESH_INTERVAL = 30000; // 30 seconds
+// Types
+interface TokenInfo {
+  symbol: string;
+  address: string;
+  decimals: number;
+}
+
+interface TokenBalance {
+  address: string;
+  balance: bigint;
+  formattedBalance: string;
+}
+
+interface MarketPrice {
+  poolKey: string;
+  price: number;
+  timestamp: number;
+}
+
+interface Pool {
+  poolId: string;
+  baseAsset: string;
+  quoteAsset: string;
+  tickSize: number;
+  lotSize: number;
+  minSize: number;
+}
 
 interface PoolWithTokens extends Pool {
   baseTokenSymbol?: string;
   quoteTokenSymbol?: string;
 }
 
+// Constants
+const CUSTODIAN_ID =
+  process.env.VITE_CUSTODIAN_ID ||
+  "0x38fe43dd9aaff19d475ddb5f6d4657243b1428bbdf0ff797bdc1dac69986c093";
+const DEFAULT_DECIMALS = 9;
+const REFRESH_INTERVAL = 30000; // 30 seconds
+const MIN_SLIPPAGE = 0.001; // 0.1%
+const DEFAULT_SLIPPAGE = 0.01; // 1%
+
 const Swap: React.FC = () => {
-  const account = useCurrentAccount();
   const suiClient = useSuiClient();
+  const account = useCurrentAccount();
   const deepBook = new DeepBookService(suiClient);
 
   // State management
@@ -58,55 +81,42 @@ const Swap: React.FC = () => {
     new Date().toISOString().replace("T", " ").split(".")[0]
   );
   const [marketPrice, setMarketPrice] = useState<MarketPrice | null>(null);
+  const [slippage, setSlippage] = useState<number>(DEFAULT_SLIPPAGE);
 
   // Utility functions
-  const formatBalance = useCallback(
-    (balance: bigint, decimals: number): string => {
-      const divisor = BigInt(10 ** decimals);
-      const integerPart = balance / divisor;
-      const fractionalPart = balance % divisor;
-      const paddedFractionalPart = fractionalPart
-        .toString()
-        .padStart(decimals, "0");
-      return `${integerPart}.${paddedFractionalPart}`.replace(/\.?0+$/, "");
-    },
-    []
-  );
-
   const updateLastRefresh = useCallback(() => {
     setLastRefresh(new Date().toISOString().replace("T", " ").split(".")[0]);
   }, []);
 
-  // Data fetching functions
+  const formatBalance = (balance: bigint, decimals: number): string => {
+    return (Number(balance) / Math.pow(10, decimals)).toFixed(decimals);
+  };
+  // Data fetching and core functionality
   const fetchPools = useCallback(async () => {
     setIsLoading(true);
     try {
-      const filter: SuiEventFilter = {
-        MoveEventType: `${DEEPBOOK_PACKAGE_ID}::clob_v2::PoolCreated`,
-      };
-
-      const events = await suiClient.queryEvents({ query: filter });
-      const tokens = new Set<string>();
+      const pools = await deepBook.getPools();
       const poolsData: PoolWithTokens[] = [];
+      const tokens = new Set<string>();
 
-      for (const event of events.data) {
-        const parsedEvent = event.parsedJson as any;
-        const pool: PoolWithTokens = {
-          poolId: parsedEvent.poolId,
-          baseAsset: parsedEvent.baseAsset,
-          quoteAsset: parsedEvent.quoteAsset,
-          tickSize: Number(parsedEvent.tickSize),
-          lotSize: Number(parsedEvent.lotSize),
-          minSize: Number(parsedEvent.minSize || 0),
-          whitelisted: Boolean(parsedEvent.whitelisted),
-          stablePool: Boolean(parsedEvent.stablePool),
-          baseTokenSymbol: parsedEvent.baseAsset.slice(0, 8),
-          quoteTokenSymbol: parsedEvent.quoteAsset.slice(0, 8),
+      for (const pool of pools.data) {
+        if (!pool.data?.content) continue;
+
+        const content = pool.data.content as any;
+        const poolData: PoolWithTokens = {
+          poolId: pool.data.objectId,
+          baseAsset: content.fields.base_asset,
+          quoteAsset: content.fields.quote_asset,
+          tickSize: Number(content.fields.tick_size || 0),
+          lotSize: Number(content.fields.lot_size || 0),
+          minSize: Number(content.fields.min_size || 0),
+          baseTokenSymbol: content.fields.base_asset.slice(0, 8),
+          quoteTokenSymbol: content.fields.quote_asset.slice(0, 8),
         };
 
-        tokens.add(pool.baseAsset);
-        tokens.add(pool.quoteAsset);
-        poolsData.push(pool);
+        tokens.add(poolData.baseAsset);
+        tokens.add(poolData.quoteAsset);
+        poolsData.push(poolData);
       }
 
       setAvailableTokens(tokens);
@@ -118,39 +128,28 @@ const Swap: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [suiClient]);
+  }, [deepBook, updateLastRefresh]);
 
   const fetchTokenBalances = useCallback(async () => {
     if (!account) return;
 
     setIsLoadingBalances(true);
     try {
-      const { data: ownedObjects } = await suiClient.getOwnedObjects({
+      const { data: coins } = await suiClient.getCoins({
         owner: account.address,
-        filter: { StructType: "0x2::coin::Coin" },
-        options: { showType: true, showContent: true },
       });
 
       const newBalances = new Map<string, TokenBalance>();
 
-      for (const obj of ownedObjects) {
-        if (!obj.data?.type || !obj.data?.content) continue;
-
-        const tokenType = obj.data.type.split("<")[1].replace(">", "");
-        const balance = BigInt(obj.data.content.fields.balance || "0");
-        const existingBalance =
-          newBalances.get(tokenType)?.balance || BigInt(0);
-
-        newBalances.set(tokenType, {
-          address: tokenType,
-          symbol: tokenType.slice(0, 8),
-          balance: existingBalance + balance,
-          decimals: DEFAULT_DECIMALS,
-          formattedBalance: formatBalance(
-            existingBalance + balance,
-            DEFAULT_DECIMALS
-          ),
-          lastUpdated: new Date().toISOString(),
+      for (const coin of coins) {
+        const formattedBalance = formatBalance(
+          BigInt(coin.balance),
+          DEFAULT_DECIMALS
+        );
+        newBalances.set(coin.coinType, {
+          address: coin.coinType,
+          balance: BigInt(coin.balance),
+          formattedBalance,
         });
       }
 
@@ -162,46 +161,11 @@ const Swap: React.FC = () => {
     } finally {
       setIsLoadingBalances(false);
     }
-  }, [account, suiClient, formatBalance]);
-
-  // ... [Continuing from previous part]
-
-  // Price and swap calculations
-  const calculateEstimatedOutput = useCallback(async () => {
-    if (!fromToken || !toToken || !amount || !account) return;
-
-    try {
-      const pool = findPool(fromToken.address, toToken.address);
-      if (!pool) {
-        setError("No liquidity pool found for this pair");
-        return;
-      }
-
-      const priceResponse = await deepBook.getMarketPrice(pool.poolId);
-      if (!priceResponse.success) {
-        throw new Error(
-          priceResponse.error?.message || "Failed to fetch price"
-        );
-      }
-
-      setMarketPrice(priceResponse.data);
-      const outputAmount = parseFloat(amount) * priceResponse.data.price;
-      setEstimatedOutput(outputAmount.toFixed(toToken.decimals));
-    } catch (error) {
-      console.error("Error calculating estimated output:", error);
-      setError("Failed to calculate estimated output");
-    }
-  }, [fromToken, toToken, amount, account, deepBook]);
+  }, [account, suiClient, updateLastRefresh]);
 
   const executeSwap = useCallback(async () => {
     if (!account || !fromToken || !toToken || !amount) {
       setError("Please fill in all fields and connect wallet");
-      return;
-    }
-
-    const balance = parseFloat(getTokenBalance(fromToken.address));
-    if (parseFloat(amount) > balance) {
-      setError("Insufficient balance");
       return;
     }
 
@@ -218,19 +182,21 @@ const Swap: React.FC = () => {
         Math.floor(parseFloat(amount) * Math.pow(10, fromToken.decimals))
       );
 
-      const swapParams: SwapParams = {
-        poolKey: pool.poolId,
+      const minOutput = estimatedOutput
+        ? Math.floor(parseFloat(estimatedOutput) * (1 - slippage))
+        : 0;
+
+      const tx = await deepBook.createMarketSwap({
+        poolId: pool.poolId,
         amount: Number(baseUnits),
-        deepAmount: 0,
-        minOut: 0, // TODO: Add slippage protection
-        deepCoin: CUSTODIAN_ID,
-      };
+        minOutput,
+        baseAsset: fromToken.address,
+        quoteAsset: toToken.address,
+      });
 
-      const tx = await deepBook.createMarketOrder(swapParams);
-
-      const result = await suiClient.signAndExecuteTransactionBlock({
-        signer: account,
+      const result = await suiClient.executeTransactionBlock({
         transactionBlock: tx,
+        requestType: "WaitForLocalExecution",
         options: {
           showEffects: true,
           showEvents: true,
@@ -238,19 +204,11 @@ const Swap: React.FC = () => {
         },
       });
 
-      console.log("Swap executed:", result);
-
-      // Reset form and refresh data
       setAmount("");
       setEstimatedOutput("");
       await Promise.all([fetchTokenBalances(), fetchPools()]);
 
-      // Show success message
-      const successMessage = `Swap successful! Transaction ID: ${result.digest.slice(
-        0,
-        8
-      )}...${result.digest.slice(-6)}`;
-      setError(successMessage);
+      setError(`Swap successful! Transaction ID: ${result.digest}`);
     } catch (error) {
       console.error("Swap error:", error);
       setError("Swap failed. Please try again.");
@@ -262,6 +220,8 @@ const Swap: React.FC = () => {
     fromToken,
     toToken,
     amount,
+    estimatedOutput,
+    slippage,
     suiClient,
     deepBook,
     fetchTokenBalances,
@@ -270,7 +230,7 @@ const Swap: React.FC = () => {
 
   // Helper functions
   const findPool = useCallback(
-    (baseAsset: string, quoteAsset: string): Pool | undefined => {
+    (baseAsset: string, quoteAsset: string): PoolWithTokens | undefined => {
       return pools.find(
         (pool) =>
           (pool.baseAsset === baseAsset && pool.quoteAsset === quoteAsset) ||
@@ -325,6 +285,10 @@ const Swap: React.FC = () => {
     }
   }, [fromToken, tokenBalances]);
 
+  const handleSlippageChange = useCallback((value: number) => {
+    setSlippage(Math.max(MIN_SLIPPAGE, Math.min(value, 1)));
+  }, []);
+
   // Effects
   useEffect(() => {
     fetchPools();
@@ -342,7 +306,6 @@ const Swap: React.FC = () => {
     }
   }, [account, availableTokens.size, fetchTokenBalances]);
 
-  // Auto-refresh
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (fromToken && toToken) {
@@ -353,7 +316,7 @@ const Swap: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fromToken, toToken, calculateEstimatedOutput]);
 
-  // Render component
+  // Render
   return (
     <div className="swap-container">
       <div className="swap-box">
@@ -387,6 +350,22 @@ const Swap: React.FC = () => {
               {isLoadingBalances && (
                 <div className="loading-balances">Loading balances...</div>
               )}
+            </div>
+
+            <div className="slippage-settings">
+              <label>Slippage Tolerance:</label>
+              <select
+                value={slippage}
+                onChange={(e) =>
+                  handleSlippageChange(parseFloat(e.target.value))
+                }
+                disabled={isLoading}
+              >
+                <option value={0.001}>0.1%</option>
+                <option value={0.005}>0.5%</option>
+                <option value={0.01}>1.0%</option>
+                <option value={0.02}>2.0%</option>
+              </select>
             </div>
 
             <div className="token-input">
@@ -491,16 +470,18 @@ const Swap: React.FC = () => {
                 !fromToken ||
                 !toToken ||
                 !amount ||
-                parseFloat(amount) >
-                  parseFloat(getTokenBalance(fromToken.address))
+                (fromToken &&
+                  parseFloat(amount) >
+                    parseFloat(getTokenBalance(fromToken.address)))
               }
             >
               {isLoading
                 ? "Processing..."
                 : !amount
                 ? "Enter amount"
-                : parseFloat(amount) >
-                  parseFloat(getTokenBalance(fromToken.address))
+                : fromToken &&
+                  parseFloat(amount) >
+                    parseFloat(getTokenBalance(fromToken.address))
                 ? "Insufficient balance"
                 : "Swap"}
             </button>

@@ -1,217 +1,215 @@
 /**
  * @file src/services/deepbook.ts
- * Updated Date: 2025-01-27 05:50:40
+ * Updated Date: 2025-01-27 21:03:35
  * Author: jake1318
  */
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { SuiClient, SuiObjectResponse } from "@mysten/sui.js/client";
 import {
-  OrderParams,
-  SwapParams,
-  Pool,
-  OrderType,
-  SelfMatchingOption,
-  CancelOrderParams,
-  QueryOrderParams,
-  ApiResponse,
-  MarketPrice,
-  Orderbook,
-} from "../types/deepbook";
+  SuiClient,
+  SuiEventFilter,
+  PaginatedObjectsResponse,
+} from "@mysten/sui.js/client";
 
-export const DEEPBOOK_PACKAGE_ID = process.env.VITE_DEEPBOOK_PACKAGE_ID || 
+export interface PoolState {
+  type: string;
+  baseAsset: string;
+  quoteAsset: string;
+  baseBalance: bigint;
+  quoteBalance: bigint;
+  lpSupply: bigint;
+  baseScale: number;
+  quoteScale: number;
+}
+
+export interface CreateOrderParams {
+  poolId: string;
+  price: number;
+  quantity: number;
+  isBid: boolean;
+  baseAsset: string;
+  quoteAsset: string;
+}
+
+export interface SwapParams {
+  poolId: string;
+  amount: number;
+  minOutput: number;
+  baseAsset: string;
+  quoteAsset: string;
+}
+
+export const DEEPBOOK_PACKAGE_ID =
+  process.env.VITE_DEEPBOOK_PACKAGE_ID ||
   "0x000000000000000000000000000000000000000000000000000000000000dee9";
-export const CLOB_V2_MODULE = "clob_v2";
-export const DEFAULT_EXPIRE_TIMESTAMP = BigInt(Math.floor(Date.now() / 1000) + 86400); // 24 hours
 
 export class DeepBookService {
-  constructor(private suiClient: SuiClient) {}
+  private readonly moduleAddress: string;
 
-  async createLimitOrder(params: OrderParams): Promise<TransactionBlock> {
-    const tx = new TransactionBlock();
-
-    const orderArguments = [
-      tx.pure(params.poolKey),
-      tx.pure(params.price),
-      tx.pure(params.quantity),
-      tx.pure(params.isBid),
-      tx.pure(params.clientOrderId),
-    ];
-
-    // Add optional parameters if provided
-    if (params.orderType) {
-      orderArguments.push(tx.pure(params.orderType));
-    }
-    if (params.selfMatchingOption) {
-      orderArguments.push(tx.pure(params.selfMatchingOption));
-    }
-    if (params.expireTimestamp) {
-      orderArguments.push(tx.pure(params.expireTimestamp));
-    } else {
-      orderArguments.push(tx.pure(DEFAULT_EXPIRE_TIMESTAMP));
-    }
-
-    tx.moveCall({
-      target: `${DEEPBOOK_PACKAGE_ID}::${CLOB_V2_MODULE}::place_limit_order`,
-      arguments: orderArguments,
-    });
-
-    return tx;
+  constructor(
+    private readonly suiClient: SuiClient,
+    packageId: string = DEEPBOOK_PACKAGE_ID
+  ) {
+    this.moduleAddress = packageId;
   }
 
-  async createMarketOrder(params: SwapParams): Promise<TransactionBlock> {
+  /**
+   * Create a transaction for placing a limit order
+   */
+  async createLimitOrder({
+    poolId,
+    price,
+    quantity,
+    isBid,
+    baseAsset,
+    quoteAsset,
+  }: CreateOrderParams): Promise<TransactionBlock> {
     const tx = new TransactionBlock();
 
-    const swapArguments = [
-      tx.pure(params.poolKey),
-      tx.pure(params.amount),
-      tx.pure(params.minOut),
-    ];
-
-    if (params.deepCoin) {
-      swapArguments.push(tx.pure(params.deepCoin));
-    }
-
-    tx.moveCall({
-      target: `${DEEPBOOK_PACKAGE_ID}::${CLOB_V2_MODULE}::swap_exact_quote_for_base`,
-      arguments: swapArguments,
-    });
-
-    return tx;
-  }
-
-  async cancelOrder(params: CancelOrderParams): Promise<TransactionBlock> {
-    const tx = new TransactionBlock();
-
-    tx.moveCall({
-      target: `${DEEPBOOK_PACKAGE_ID}::${CLOB_V2_MODULE}::cancel_order`,
+    const [pool] = tx.moveCall({
+      target: `${this.moduleAddress}::clob_v2::create_limit_order`,
       arguments: [
-        tx.pure(params.poolKey),
-        tx.pure(params.orderId),
-        params.clientOrderId ? tx.pure(params.clientOrderId) : tx.pure(""),
+        tx.pure(poolId),
+        tx.pure(price),
+        tx.pure(quantity),
+        tx.pure(isBid),
+        tx.pure(baseAsset),
+        tx.pure(quoteAsset),
       ],
     });
 
     return tx;
   }
 
-  async getPoolLiquidity(poolKey: string): Promise<ApiResponse<Pool>> {
+  /**
+   * Create a transaction for market swap
+   */
+  async createMarketSwap({
+    poolId,
+    amount,
+    minOutput,
+    baseAsset,
+    quoteAsset,
+  }: SwapParams): Promise<TransactionBlock> {
+    const tx = new TransactionBlock();
+
+    const [pool] = tx.moveCall({
+      target: `${this.moduleAddress}::clob_v2::swap_exact_base_for_quote`,
+      arguments: [
+        tx.pure(poolId),
+        tx.pure(amount),
+        tx.pure(minOutput),
+        tx.pure(baseAsset),
+        tx.pure(quoteAsset),
+      ],
+    });
+
+    return tx;
+  }
+
+  /**
+   * Get pool state
+   */
+  async getPoolState(poolId: string): Promise<PoolState | null> {
     try {
-      const poolData = await this.suiClient.getObject({
-        id: poolKey,
+      const response = await this.suiClient.getObject({
+        id: poolId,
         options: {
           showContent: true,
-          showType: true,
         },
       });
 
-      if (!poolData.data) {
-        throw new Error("Pool not found");
+      if (!response.data || !response.data.content) {
+        return null;
       }
 
+      const content = response.data.content as any;
+      const fields = content.fields;
+
       return {
-        success: true,
-        data: this.parsePoolData(poolData),
-        timestamp: Date.now(),
+        type: content.type,
+        baseAsset: fields.base_asset,
+        quoteAsset: fields.quote_asset,
+        baseBalance: BigInt(fields.base_balance),
+        quoteBalance: BigInt(fields.quote_balance),
+        lpSupply: BigInt(fields.lp_supply),
+        baseScale: Number(fields.base_scale),
+        quoteScale: Number(fields.quote_scale),
       };
     } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: 404,
-          message: error instanceof Error ? error.message : "Failed to fetch pool data",
-        },
-        timestamp: Date.now(),
-      };
+      console.error("Error fetching pool state:", error);
+      return null;
     }
   }
 
-  async getOrderbook(poolKey: string): Promise<ApiResponse<Orderbook>> {
-    try {
-      const orderbook = await this.suiClient.getDynamicFields({
-        parentId: poolKey,
-      });
+  /**
+   * Get current price from pool
+   */
+  async getCurrentPrice(poolId: string): Promise<number | null> {
+    const state = await this.getPoolState(poolId);
+    if (!state) return null;
 
-      return {
-        success: true,
-        data: {
-          bids: this.parseOrderbookSide(orderbook.data, true),
-          asks: this.parseOrderbookSide(orderbook.data, false),
-          lastUpdateTime: Date.now(),
-        },
-        timestamp: Date.now(),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: 500,
-          message: error instanceof Error ? error.message : "Failed to fetch orderbook",
-        },
-        timestamp: Date.now(),
-      };
-    }
+    const baseScale = Math.pow(10, state.baseScale);
+    const quoteScale = Math.pow(10, state.quoteScale);
+
+    if (state.baseBalance === 0n) return null;
+
+    return (
+      Number(state.quoteBalance) /
+      quoteScale /
+      (Number(state.baseBalance) / baseScale)
+    );
   }
 
-  async getMarketPrice(poolKey: string): Promise<ApiResponse<MarketPrice>> {
-    try {
-      const price = await this.suiClient.getDynamicFieldObject({
-        parentId: poolKey,
-        name: {
-          type: "u64",
-          value: "price",
-        },
-      });
-
-      return {
-        success: true,
-        data: {
-          poolKey,
-          price: this.parsePrice(price),
-          timestamp: Date.now(),
-        },
-        timestamp: Date.now(),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: 500,
-          message: error instanceof Error ? error.message : "Failed to fetch market price",
-        },
-        timestamp: Date.now(),
-      };
-    }
+  /**
+   * Get list of pools
+   */
+  async getPools(): Promise<PaginatedObjectsResponse> {
+    return this.suiClient.getOwnedObjects({
+      filter: {
+        StructType: `${this.moduleAddress}::clob_v2::Pool`,
+      },
+      options: {
+        showContent: true,
+      },
+    });
   }
 
-  private calculateMinimumReceived(amount: number, slippage: number = 0.01): number {
-    return amount * (1 - slippage);
+  /**
+   * Calculate output amount for swap
+   */
+  calculateSwapOutput(
+    inputAmount: number,
+    poolBaseBalance: bigint,
+    poolQuoteBalance: bigint,
+    baseScale: number,
+    quoteScale: number
+  ): number {
+    const baseScaleBN = BigInt(Math.pow(10, baseScale));
+    const quoteScaleBN = BigInt(Math.pow(10, quoteScale));
+
+    const inputAmountBN = BigInt(Math.floor(inputAmount * Number(baseScaleBN)));
+
+    const numerator = inputAmountBN * poolQuoteBalance;
+    const denominator = poolBaseBalance + inputAmountBN;
+
+    const outputAmountBN = numerator / denominator;
+    return Number(outputAmountBN) / Number(quoteScaleBN);
   }
 
-  private parsePoolData(poolData: SuiObjectResponse): Pool {
-    // Implementation depends on the exact structure of your pool data
-    const content = poolData.data?.content as any;
-    return {
-      poolId: poolData.data?.objectId || "",
-      baseCoinKey: content?.base_asset || "",
-      quoteCoinKey: content?.quote_asset || "",
-      baseAsset: content?.base_asset || "",
-      quoteAsset: content?.quote_asset || "",
-      tickSize: parseFloat(content?.tick_size || "0"),
-      lotSize: parseFloat(content?.lot_size || "0"),
-      minSize: parseFloat(content?.min_size || "0"),
-      whitelisted: content?.whitelisted || false,
-      stablePool: content?.stable_pool || false,
-    };
+  /**
+   * Utility: Convert base units to decimal
+   */
+  baseUnitsToDecimal(amount: bigint, decimals: number): number {
+    return Number(amount) / Math.pow(10, decimals);
   }
 
-  private parseOrderbookSide(data: any[], isBid: boolean): { price: number; quantity: number }[] {
-    // Implementation depends on your orderbook data structure
-    return [];
-  }
-
-  private parsePrice(priceData: any): number {
-    // Implementation depends on your price data structure
-    return 0;
+  /**
+   * Utility: Convert decimal to base units
+   */
+  decimalToBaseUnits(amount: number, decimals: number): bigint {
+    return BigInt(Math.floor(amount * Math.pow(10, decimals)));
   }
 }
+
+export default DeepBookService;

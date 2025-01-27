@@ -1,193 +1,211 @@
 /**
  * @file src/types/deepbook.ts
- * Updated Date: 2025-01-27 05:47:51
+ * Updated Date: 2025-01-27 20:19:55
  * Author: jake1318
  */
 
-import { SuiObjectResponse } from '@mysten/sui.js/client';
+import type { SuiObjectResponse } from "@mysten/sui.js/client";
 
 export interface OrderParams {
-    poolKey: string;
-    balanceManagerKey: string;
-    clientOrderId: string;
-    price: number;
-    quantity: number;
-    isBid: boolean;
-    orderType?: 'GTC' | 'IOC' | 'FOK' | 'POST_ONLY';
-    selfMatchingOption?: 'ALLOW' | 'ABORT' | 'CANCEL_NEWEST' | 'CANCEL_OLDEST';
-    payWithDeep?: boolean;
-    owner?: string;
-    expireTimestamp?: number;
+  poolKey: string;
+  price: number;
+  quantity: number;
+  isBid: boolean;
+  clientOrderId?: string;
+  orderType?: OrderType;
+  selfMatchingOption?: SelfMatchingOption;
+  expireTimestamp?: bigint;
+  owner?: string;
 }
 
 export interface SwapParams {
-    poolKey: string;
-    amount: number;
-    deepAmount: number;
-    minOut: number;
-    deepCoin?: string;
-    slippage?: number;
+  poolKey: string;
+  amount: number;
+  minOut: number;
+  deepCoin?: string;
+  slippage?: number;
 }
 
 export interface Pool {
-    poolId: string;
-    baseCoinKey: string;
-    quoteCoinKey: string;
-    baseAsset: string;
-    quoteAsset: string;
-    tickSize: number;
-    lotSize: number;
-    minSize: number;
-    whitelisted: boolean;
-    stablePool: boolean;
-    poolType?: 'BASIC' | 'STABLE';
+  poolId: string;
+  baseCoinKey: string;
+  quoteCoinKey: string;
+  baseAsset: string;
+  quoteAsset: string;
+  tickSize: number;
+  lotSize: number;
+  minSize: number;
+  whitelisted: boolean;
+  stablePool: boolean;
+  poolType?: PoolType;
 }
 
-export interface PoolEvent {
-    id: string;
-    packageId: string;
-    transactionModule: string;
-    type: string;
-    parsedJson: {
-        poolId: string;
-        baseAsset: string;
-        quoteAsset: string;
-        tickSize: string;
-        lotSize: string;
-        minSize: string;
-        whitelisted?: boolean;
-        stablePool?: boolean;
-    };
+export interface TokenInfo {
+  symbol: string;
+  address: string;
+  decimals: number;
+  name?: string;
 }
 
 export interface TokenBalance {
-    balance: bigint;
-    decimals: number;
-    symbol?: string;
-    name?: string;
-}
-
-export interface OrderStatus {
-    orderId: string;
-    clientOrderId: string;
-    price: number;
-    quantity: number;
-    isBid: boolean;
-    orderType: string;
-    status: 'OPEN' | 'FILLED' | 'CANCELLED' | 'EXPIRED';
-    filledQuantity: number;
-    filledPrice?: number;
-    timestamp: number;
+  balance: bigint;
+  decimals: number;
+  symbol: string;
+  name?: string;
+  address: string;
+  formattedBalance: string;
+  lastUpdated: string;
 }
 
 export interface MarketPrice {
-    poolKey: string;
-    price: number;
-    timestamp: number;
-    baseVolume24h?: number;
-    quoteVolume24h?: number;
-    priceChange24h?: number;
-}
-
-export interface DeepBookConfig {
-    packageId: string;
-    moduleId: string;
-    env: 'mainnet' | 'testnet' | 'devnet';
-    rpcUrl?: string;
-}
-
-export interface BalanceManager {
-    address: string;
-    tradeCap: string;
-    balances?: {
-        [key: string]: TokenBalance;
-    };
+  poolKey: string;
+  price: number;
+  timestamp: number;
+  baseVolume24h?: number;
+  quoteVolume24h?: number;
+  priceChange24h?: number;
 }
 
 export interface OrderbookLevel {
-    price: number;
-    quantity: number;
-    numOrders?: number;
+  price: number;
+  quantity: number;
+  numOrders?: number;
 }
 
 export interface Orderbook {
-    bids: OrderbookLevel[];
-    asks: OrderbookLevel[];
-    lastUpdateTime: number;
+  bids: OrderbookLevel[];
+  asks: OrderbookLevel[];
+  lastUpdateTime: number;
 }
 
 export interface TradeHistory {
-    price: number;
-    quantity: number;
-    side: 'BUY' | 'SELL';
-    timestamp: number;
-    orderId?: string;
-    clientOrderId?: string;
+  price: number;
+  quantity: number;
+  side: OrderSide;
+  timestamp: number;
+  orderId?: string;
+  clientOrderId?: string;
 }
-
-export type OrderType = 'GTC' | 'IOC' | 'FOK' | 'POST_ONLY';
-export type SelfMatchingOption = 'ALLOW' | 'ABORT' | 'CANCEL_NEWEST' | 'CANCEL_OLDEST';
-export type OrderSide = 'BUY' | 'SELL';
-export type OrderStatus = 'OPEN' | 'FILLED' | 'CANCELLED' | 'EXPIRED';
 
 export interface CancelOrderParams {
-    poolKey: string;
-    orderId: string;
-    clientOrderId?: string;
-}
-
-export interface QueryOrderParams {
-    poolKey?: string;
-    orderId?: string;
-    clientOrderId?: string;
-    status?: OrderStatus;
-    startTime?: number;
-    endTime?: number;
-    limit?: number;
+  poolKey: string;
+  orderId: string;
+  clientOrderId?: string;
 }
 
 export interface ErrorResponse {
-    code: number;
-    message: string;
-    details?: any;
+  code: number;
+  message: string;
+  details?: any;
 }
 
-// Utility type for handling API responses
 export interface ApiResponse<T> {
-    success: boolean;
-    data?: T;
-    error?: ErrorResponse;
-    timestamp: number;
+  success: boolean;
+  data?: T;
+  error?: ErrorResponse;
+  timestamp: number;
 }
+
+// Enums as string literal types
+export type OrderType = "GTC" | "IOC" | "FOK" | "POST_ONLY";
+export type SelfMatchingOption =
+  | "ALLOW"
+  | "ABORT"
+  | "CANCEL_NEWEST"
+  | "CANCEL_OLDEST";
+export type OrderSide = "BUY" | "SELL";
+export type OrderStatus = "OPEN" | "FILLED" | "CANCELLED" | "EXPIRED";
+export type PoolType = "BASIC" | "STABLE";
 
 // Type guard functions
-export const isPoolEvent = (event: any): event is PoolEvent => {
-    return (
-        event &&
-        event.parsedJson &&
-        typeof event.parsedJson.poolId === 'string' &&
-        typeof event.parsedJson.baseAsset === 'string' &&
-        typeof event.parsedJson.quoteAsset === 'string'
-    );
+export const isPool = (pool: any): pool is Pool => {
+  return (
+    pool &&
+    typeof pool.poolId === "string" &&
+    typeof pool.baseAsset === "string" &&
+    typeof pool.quoteAsset === "string" &&
+    typeof pool.tickSize === "number" &&
+    typeof pool.lotSize === "number"
+  );
 };
 
 export const isOrderParams = (params: any): params is OrderParams => {
-    return (
-        params &&
-        typeof params.poolKey === 'string' &&
-        typeof params.price === 'number' &&
-        typeof params.quantity === 'number' &&
-        typeof params.isBid === 'boolean'
-    );
+  return (
+    params &&
+    typeof params.poolKey === "string" &&
+    typeof params.price === "number" &&
+    typeof params.quantity === "number" &&
+    typeof params.isBid === "boolean"
+  );
 };
 
-export const isPool = (pool: any): pool is Pool => {
-    return (
-        pool &&
-        typeof pool.poolId === 'string' &&
-        typeof pool.baseAsset === 'string' &&
-        typeof pool.quoteAsset === 'string' &&
-        typeof pool.tickSize === 'number' &&
-        typeof pool.lotSize === 'number'
-    );
+export const isMarketPrice = (price: any): price is MarketPrice => {
+  return (
+    price &&
+    typeof price.poolKey === "string" &&
+    typeof price.price === "number" &&
+    typeof price.timestamp === "number"
+  );
+};
+
+export const isTokenBalance = (balance: any): balance is TokenBalance => {
+  return (
+    balance &&
+    typeof balance.balance === "bigint" &&
+    typeof balance.decimals === "number" &&
+    typeof balance.symbol === "string" &&
+    typeof balance.address === "string" &&
+    typeof balance.formattedBalance === "string" &&
+    typeof balance.lastUpdated === "string"
+  );
+};
+
+export const isOrderbookLevel = (level: any): level is OrderbookLevel => {
+  return (
+    level &&
+    typeof level.price === "number" &&
+    typeof level.quantity === "number"
+  );
+};
+
+export const formatTokenBalance = (
+  balance: bigint,
+  decimals: number,
+  symbol: string
+): TokenBalance => {
+  const divisor = BigInt(10 ** decimals);
+  const integerPart = balance / divisor;
+  const fractionalPart = balance % divisor;
+  const formattedBalance = `${integerPart}.${fractionalPart
+    .toString()
+    .padStart(decimals, "0")}`.replace(/\.?0+$/, "");
+
+  return {
+    balance,
+    decimals,
+    symbol,
+    address: symbol,
+    formattedBalance,
+    lastUpdated: new Date().toISOString(),
+  };
+};
+
+export const calculatePriceImpact = (
+  orderSize: number,
+  marketPrice: number,
+  orderBookSide: OrderbookLevel[]
+): number => {
+  let remainingSize = orderSize;
+  let totalCost = 0;
+
+  for (const level of orderBookSide) {
+    const sizeAtLevel = Math.min(remainingSize, level.quantity);
+    totalCost += sizeAtLevel * level.price;
+    remainingSize -= sizeAtLevel;
+
+    if (remainingSize <= 0) break;
+  }
+
+  const marketCost = orderSize * marketPrice;
+  return ((totalCost - marketCost) / marketCost) * 100;
 };
