@@ -1,0 +1,166 @@
+/* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global Styles */
+body {
+  font-family: "Orbitron", sans-serif;
+  background-color: #252525;
+  color: #e0e0e0;
+  line-height: 1.5;
+}
+
+/* Coming Soon Banner */
+.coming-soon-banner {
+  background-color: #ff5722;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Navbar (inherits styles from your global Navbar component) */
+.navbar {
+  background-color: #141414;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+  z-index: 1000;
+}
+
+/* Hero Section */
+.hero {
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #1e1e1e, #00a3ff);
+  color: #e0e0e0;
+  padding: 20px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  color: #00a3ff;
+  text-shadow: 0 0 10px #00a3ff;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.5rem;
+  color: #87cefa;
+  text-shadow: 0 0 5px rgba(135, 206, 250, 0.5);
+  margin-bottom: 2rem;
+}
+
+/* Marketplace Section */
+.agent-marketplace {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.agent-marketplace h2 {
+  font-size: 2.5rem;
+  color: #87cefa;
+  margin-bottom: 1rem;
+}
+
+.agent-marketplace p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #e0e0e0;
+}
+
+/* Agent Grid */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.agent-card {
+  background-color: rgba(30, 30, 30, 0.8);
+  border: 1px solid #333;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.agent-card img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 1rem;
+}
+
+.agent-card h3 {
+  font-size: 1.5rem;
+  color: #00a3ff;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 5px #00a3ff;
+}
+
+.agent-card p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.agent-card button {
+  background-color: #00a3ff;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #00a3ff;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.agent-card button:hover {
+  background-color: #007acc;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #007acc;
+}
+
+.agent-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 20px rgba(0, 163, 255, 0.5);
+}
+
+/* Footer */
+footer {
+  background-color: #141414;
+  color: #e0e0e0;
+  text-align: center;
+  padding: 20px 0;
+  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .agent-grid {
+    grid-template-columns: 1fr;
+  }
+}
