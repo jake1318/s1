@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/footer.tsx","./src/components/navbar.tsx","./src/pages/dex/dex.tsx","./src/pages/home/homepage.tsx","./src/pages/marketplace/marketplace.tsx","./src/pages/search/search.tsx","./src/pages/swap/swap.tsx","./src/services/deepbook.ts","./src/types/deepbook.ts"],"errors":true,"version":"5.6.3"}

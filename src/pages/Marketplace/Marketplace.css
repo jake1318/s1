@@ -1,166 +1,181 @@
-/* Reset default styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* src/pages/Marketplace/Marketplace.css */
+.marketplace-container {
+  min-height: 100vh;
+  background: rgba(20, 20, 20, 0.95);
+  color: #ffffff;
 }
 
-/* Global Styles */
-body {
-  font-family: "Orbitron", sans-serif;
-  background-color: #252525;
-  color: #e0e0e0;
-  line-height: 1.5;
-}
-
-/* Coming Soon Banner */
 .coming-soon-banner {
-  background-color: #ff5722;
-  color: #fff;
+  background: linear-gradient(90deg, #00a3ff, #00ffff);
+  color: white;
   text-align: center;
-  padding: 10px 0;
-  font-size: 1.2rem;
+  padding: 0.5rem;
   font-weight: bold;
-}
-
-/* Navbar (inherits styles from your global Navbar component) */
-.navbar {
-  background-color: #141414;
-  padding: 1rem 2rem;
-  position: fixed;
-  top: 0;
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
-  z-index: 1000;
+  padding: 0.5rem 2rem;
 }
 
-/* Hero Section */
+.banner-text {
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 2px;
+}
+
+.utc-time {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
 .hero {
-  height: 50vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  background: linear-gradient(135deg, #1e1e1e, #00a3ff);
-  color: #e0e0e0;
-  padding: 20px;
+  padding: 4rem 2rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("/path-to-your-hero-image.jpg") center/cover;
 }
 
 .hero h1 {
   font-size: 3rem;
-  color: #00a3ff;
-  text-shadow: 0 0 10px #00a3ff;
+  color: #00ffff;
   margin-bottom: 1rem;
+  font-family: "Orbitron", sans-serif;
 }
 
 .hero p {
-  font-size: 1.5rem;
-  color: #87cefa;
-  text-shadow: 0 0 5px rgba(135, 206, 250, 0.5);
-  margin-bottom: 2rem;
-}
-
-/* Marketplace Section */
-.agent-marketplace {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.agent-marketplace h2 {
-  font-size: 2.5rem;
-  color: #87cefa;
-  margin-bottom: 1rem;
-}
-
-.agent-marketplace p {
   font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: #e0e0e0;
+  max-width: 600px;
+  margin: 0 auto;
+  color: #ffffff;
 }
 
-/* Agent Grid */
+.wallet-status {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 163, 255, 0.1);
+  border: 1px solid #00a3ff;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.agent-marketplace {
+  padding: 4rem 2rem;
+}
+
 .agent-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 0 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 .agent-card {
-  background-color: rgba(30, 30, 30, 0.8);
-  border: 1px solid #333;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.agent-card img {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 1rem;
-}
-
-.agent-card h3 {
-  font-size: 1.5rem;
-  color: #00a3ff;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 5px #00a3ff;
-}
-
-.agent-card p {
-  font-size: 1rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
-}
-
-.agent-card button {
-  background-color: #00a3ff;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 0 0 5px #00a3ff;
-  transition: background-color 0.3s ease, transform 0.2s;
-}
-
-.agent-card button:hover {
-  background-color: #007acc;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #007acc;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid #00a3ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
 }
 
 .agent-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 8px 20px rgba(0, 163, 255, 0.5);
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(0, 163, 255, 0.3);
 }
 
-/* Footer */
-footer {
-  background-color: #141414;
-  color: #e0e0e0;
-  text-align: center;
-  padding: 20px 0;
-  box-shadow: 0 0 10px rgba(0, 163, 255, 0.3);
+.agent-image-placeholder {
+  width: 100%;
+  height: 150px;
+  background: linear-gradient(45deg, #00a3ff, #00ffff);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
-/* Responsive Design */
+.agent-image-placeholder span {
+  font-size: 2rem;
+  color: white;
+  font-weight: bold;
+}
+
+.agent-stats {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.view-details-btn {
+  width: 100%;
+  padding: 0.8rem;
+  background: transparent;
+  border: 1px solid #00a3ff;
+  color: #00a3ff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-details-btn:hover {
+  background: #00a3ff;
+  color: white;
+}
+
+.marketplace-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  margin-top: 4rem;
+}
+
+.info-card {
+  padding: 1.5rem;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid #00a3ff;
+  border-radius: 8px;
+}
+
+.info-card h3 {
+  color: #00ffff;
+  margin-bottom: 1rem;
+  font-family: "Orbitron", sans-serif;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-card ul li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.info-card ul li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #00a3ff;
+}
+
 @media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1rem;
+  }
+
   .hero h1 {
     font-size: 2rem;
   }
 
-  .hero p {
-    font-size: 1rem;
+  .agent-marketplace {
+    padding: 2rem 1rem;
   }
 
-  .agent-grid {
-    grid-template-columns: 1fr;
+  .marketplace-info {
+    padding: 1rem;
   }
 }

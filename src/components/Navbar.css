@@ -1,158 +1,128 @@
+/* src/components/Navbar.css */
+
 .navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: rgba(26, 26, 26, 0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 163, 255, 0.2);
-  z-index: 1000;
-  padding: 0.5rem 2rem;
-  height: 80px; /* Fixed height */
-}
-
-.navbar-content {
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
-  align-items: center; /* Center items vertically */
   justify-content: space-between;
-  height: 100%;
-}
-
-/* Logo container */
-.logo-container {
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  min-width: 200px; /* Fixed width for logo section */
+  padding: 1rem 2rem;
+  background: rgba(30, 30, 30, 0.95);
+  border-bottom: 1px solid #00a3ff;
+  box-shadow: 0 0 20px rgba(0, 163, 255, 0.2);
 }
 
-.logo-image {
-  height: 40px;
-  width: auto;
-}
-
-.logo-text {
-  font-family: "Orbitron", sans-serif;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00a3ff;
-}
-
-/* Navigation Links */
-.nav-center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.nav-links {
+.navbar-left ul {
   display: flex;
   gap: 2rem;
   list-style: none;
   margin: 0;
   padding: 0;
-  align-items: center;
 }
 
-.nav-item {
-  position: relative;
-}
-
-.nav-link {
-  font-family: "Orbitron", sans-serif;
-  color: #e0e0e0;
+.navbar-left a {
+  color: #fff;
   text-decoration: none;
+  font-family: "Orbitron", sans-serif;
   font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
 }
 
-.nav-link:hover {
-  color: #00a3ff;
+.navbar-left a:hover {
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  background: rgba(0, 163, 255, 0.1);
 }
 
-.nav-link::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 100%;
-  height: 2px;
-  background: #00a3ff;
-  transition: transform 0.3s ease;
-}
-
-.nav-link:hover::after {
-  transform: translateX(-50%) scaleX(1);
-}
-
-/* Wallet Button Container */
-.nav-right {
+.navbar-right {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  min-width: 200px; /* Fixed width for wallet section */
+}
+
+.wallet-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(0, 163, 255, 0.1);
+  border: 1px solid rgba(0, 163, 255, 0.2);
+  border-radius: 8px;
+}
+
+.wallet-address {
+  color: #00ffff;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wallet-address:hover {
+  color: #00a3ff;
+  text-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
+}
+
+/* Override default dapp-kit button styles */
+:root {
+  --dapp-kit-primary: #00a3ff;
+  --dapp-kit-primary-hover: #00ffff;
+  --dapp-kit-background: rgba(30, 30, 30, 0.95);
+  --dapp-kit-text: #ffffff;
+  --dapp-kit-border-radius: 8px;
+}
+
+.sui-connect-button {
+  font-family: "Orbitron", sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  padding: 0.5rem 1.5rem !important;
+  border: 1px solid #00a3ff !important;
+  background: transparent !important;
+  color: #00a3ff !important;
+  transition: all 0.3s ease !important;
+}
+
+.sui-connect-button:hover {
+  background: rgba(0, 163, 255, 0.1) !important;
+  border-color: #00ffff !important;
+  color: #00ffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(0, 163, 255, 0.3);
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
-  .navbar {
-    padding: 0.5rem 1rem;
-  }
-
-  .logo-container {
-    min-width: 150px;
-  }
-
-  .nav-right {
-    min-width: 150px;
-  }
-
-  .nav-links {
-    gap: 1rem;
-  }
-}
-
 @media (max-width: 768px) {
   .navbar {
-    height: auto;
-  }
-
-  .navbar-content {
+    padding: 1rem;
     flex-direction: column;
-    padding: 1rem 0;
     gap: 1rem;
   }
 
-  .logo-container,
-  .nav-right {
-    min-width: 100%;
+  .navbar-left ul {
+    gap: 1rem;
+    flex-wrap: wrap;
     justify-content: center;
   }
 
-  .nav-links {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+  .navbar-left a {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .wallet-section {
+    flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
   }
 
-  .nav-link {
-    padding: 0.25rem 0.5rem;
-  }
-}
-
-/* Add padding to body to prevent overlap with navbar */
-
-@media (max-width: 768px) {
-  body {
-    padding-top: 120px;
+  .wallet-info {
+    padding: 0.3rem;
   }
 }

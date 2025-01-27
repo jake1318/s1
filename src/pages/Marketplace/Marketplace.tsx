@@ -1,19 +1,18 @@
+// src/pages/Marketplace/Marketplace.tsx
 import React from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 import "./Marketplace.css";
 
 const MarketplacePage: React.FC = () => {
-  const connectWallet = () => {
-    alert("Wallet connection functionality coming soon!");
-  };
+  const account = useCurrentAccount();
 
   return (
-    <div>
+    <div className="marketplace-container">
       {/* Coming Soon Banner */}
-      <div className="coming-soon-banner">Coming Soon</div>
-
-      <Navbar />
+      <div className="coming-soon-banner">
+        <span className="banner-text">Coming Soon</span>
+        <span className="utc-time">UTC: 2025-01-27 05:25:36</span>
+      </div>
 
       <main>
         <section className="hero">
@@ -22,6 +21,12 @@ const MarketplacePage: React.FC = () => {
             Discover, list, and manage SUI AI Agents in our exclusive
             marketplace.
           </p>
+          {account && (
+            <div className="wallet-status">
+              Connected:{" "}
+              {`${account.address.slice(0, 6)}...${account.address.slice(-4)}`}
+            </div>
+          )}
         </section>
 
         <section className="agent-marketplace">
@@ -34,45 +39,89 @@ const MarketplacePage: React.FC = () => {
           <div className="agent-grid">
             {/* Sample Agent Card */}
             <div className="agent-card">
-              <img src="agent1.png" alt="Agent Icon" />
+              <div className="agent-image-placeholder">
+                <span>AI</span>
+              </div>
               <h3>Data Miner AI</h3>
               <p>
                 A powerful AI agent to extract insights from blockchain data.
               </p>
-              <button>View Details</button>
+              <div className="agent-stats">
+                <span>Status: Coming Soon</span>
+                <span>Type: Analytics</span>
+              </div>
+              <button className="view-details-btn">View Details</button>
             </div>
 
             <div className="agent-card">
-              <img src="agent2.png" alt="Agent Icon" />
+              <div className="agent-image-placeholder">
+                <span>AI</span>
+              </div>
               <h3>Trade Optimizer AI</h3>
               <p>
                 An AI agent to optimize your SUI token trades with precision.
               </p>
-              <button>View Details</button>
+              <div className="agent-stats">
+                <span>Status: Coming Soon</span>
+                <span>Type: Trading</span>
+              </div>
+              <button className="view-details-btn">View Details</button>
             </div>
 
             <div className="agent-card">
-              <img src="agent3.png" alt="Agent Icon" />
+              <div className="agent-image-placeholder">
+                <span>AI</span>
+              </div>
               <h3>Smart Contract Assistant</h3>
               <p>
                 An AI agent that helps in writing and deploying smart contracts.
               </p>
-              <button>View Details</button>
+              <div className="agent-stats">
+                <span>Status: Coming Soon</span>
+                <span>Type: Development</span>
+              </div>
+              <button className="view-details-btn">View Details</button>
             </div>
 
             <div className="agent-card">
-              <img src="agent4.png" alt="Agent Icon" />
+              <div className="agent-image-placeholder">
+                <span>AI</span>
+              </div>
               <h3>Security Auditor AI</h3>
               <p>
                 Scan your smart contracts for vulnerabilities and ensure safety.
               </p>
-              <button>View Details</button>
+              <div className="agent-stats">
+                <span>Status: Coming Soon</span>
+                <span>Type: Security</span>
+              </div>
+              <button className="view-details-btn">View Details</button>
             </div>
           </div>
         </section>
-      </main>
 
-      <Footer />
+        <section className="marketplace-info">
+          <div className="info-card">
+            <h3>Marketplace Features</h3>
+            <ul>
+              <li>AI Agent Discovery</li>
+              <li>Secure Transactions</li>
+              <li>Agent Performance Metrics</li>
+              <li>Custom Agent Development</li>
+            </ul>
+          </div>
+
+          <div className="info-card">
+            <h3>Coming Updates</h3>
+            <ul>
+              <li>Agent Rating System</li>
+              <li>Custom Agent Requests</li>
+              <li>Integration API</li>
+              <li>Agent Marketplace SDK</li>
+            </ul>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
