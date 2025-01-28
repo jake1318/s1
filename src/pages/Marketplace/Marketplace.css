@@ -1,181 +1,74 @@
-/* src/pages/Marketplace/Marketplace.css */
+/* Marketplace Page Styles */
+
 .marketplace-container {
-  min-height: 100vh;
-  background: rgba(20, 20, 20, 0.95);
-  color: #ffffff;
-}
-
-.coming-soon-banner {
-  background: linear-gradient(90deg, #00a3ff, #00ffff);
-  color: white;
-  text-align: center;
-  padding: 0.5rem;
-  font-weight: bold;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 2rem;
-}
-
-.banner-text {
-  font-family: "Orbitron", sans-serif;
-  letter-spacing: 2px;
-}
-
-.utc-time {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-.hero {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url("/path-to-your-hero-image.jpg") center/cover;
-}
-
-.hero h1 {
-  font-size: 3rem;
-  color: #00ffff;
-  margin-bottom: 1rem;
-  font-family: "Orbitron", sans-serif;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  max-width: 600px;
-  margin: 0 auto;
-  color: #ffffff;
-}
-
-.wallet-status {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: rgba(0, 163, 255, 0.1);
-  border: 1px solid #00a3ff;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.agent-marketplace {
-  padding: 4rem 2rem;
-}
-
-.agent-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.agent-card {
-  background: rgba(30, 30, 30, 0.95);
-  border: 1px solid #00a3ff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.agent-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 20px rgba(0, 163, 255, 0.3);
-}
-
-.agent-image-placeholder {
-  width: 100%;
-  height: 150px;
-  background: linear-gradient(45deg, #00a3ff, #00ffff);
-  border-radius: 8px;
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a, #000000);
+  color: #e0e0e0;
+  padding: 40px;
 }
 
-.agent-image-placeholder span {
-  font-size: 2rem;
-  color: white;
-  font-weight: bold;
-}
-
-.agent-stats {
-  display: flex;
-  justify-content: space-between;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.view-details-btn {
-  width: 100%;
-  padding: 0.8rem;
-  background: transparent;
-  border: 1px solid #00a3ff;
+.marketplace-title {
+  font-size: 2.5rem;
   color: #00a3ff;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  text-shadow: 0 0 15px #00a3ff;
+  margin-bottom: 20px;
 }
 
-.view-details-btn:hover {
-  background: #00a3ff;
-  color: white;
-}
-
-.marketplace-info {
+.marketplace-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.3);
-  margin-top: 4rem;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
 }
 
-.info-card {
-  padding: 1.5rem;
-  background: rgba(30, 30, 30, 0.95);
-  border: 1px solid #00a3ff;
+.marketplace-card {
+  background: #141414;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.marketplace-card:hover {
+  transform: translateY(-5px);
+}
+
+.marketplace-card img {
+  width: 100%;
   border-radius: 8px;
+  margin-bottom: 10px;
 }
 
-.info-card h3 {
+.marketplace-card h3 {
   color: #00ffff;
-  margin-bottom: 1rem;
-  font-family: "Orbitron", sans-serif;
+  margin-bottom: 10px;
 }
 
-.info-card ul {
-  list-style: none;
-  padding: 0;
+.marketplace-card p {
+  font-size: 0.9rem;
+  color: #bbb;
 }
 
-.info-card ul li {
-  margin-bottom: 0.5rem;
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-.info-card ul li:before {
-  content: "→";
-  position: absolute;
-  left: 0;
+.marketplace-button {
+  background: transparent;
+  border: 2px solid #00a3ff;
   color: #00a3ff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  display: inline-block;
+  margin-top: 10px;
 }
 
-@media (max-width: 768px) {
-  .hero {
-    padding: 2rem 1rem;
-  }
-
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .agent-marketplace {
-    padding: 2rem 1rem;
-  }
-
-  .marketplace-info {
-    padding: 1rem;
-  }
+.marketplace-button:hover {
+  background-color: #00ffff;
+  color: #1a1a1a;
+  box-shadow: 0 0 15px #00ffff;
 }

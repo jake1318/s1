@@ -1,5 +1,3 @@
-// src/components/Navbar.tsx
-
 import { Link } from "react-router-dom";
 import React from "react";
 import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";

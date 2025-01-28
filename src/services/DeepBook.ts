@@ -27,7 +27,7 @@ export interface SwapParams {
 }
 
 export const DEEPBOOK_PACKAGE_ID =
-  process.env.VITE_DEEPBOOK_PACKAGE_ID ||
+  import.meta.env.VITE_DEEPBOOK_PACKAGE_ID ||
   "0x000000000000000000000000000000000000000000000000000000000000dee9";
 
 export class DeepBookService {
