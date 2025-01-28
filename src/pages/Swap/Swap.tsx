@@ -1,18 +1,12 @@
 /**
  * @file src/pages/Swap/Swap.tsx
- * Updated Date: 2025-01-27 21:11:56
+ * Updated Date: 2025-01-27 21:35:07
  * Author: jake1318
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
-import {
-  SuiClient,
-  PaginatedObjectsResponse,
-  SuiTransactionBlockResponse,
-} from "@mysten/sui.js/client";
-import { DeepBookService, DEEPBOOK_PACKAGE_ID } from "../../services/deepbook";
+import { DeepBookService } from "../../services/deepbook";
 import "./Swap.css";
 
 // Types
@@ -49,9 +43,6 @@ interface PoolWithTokens extends Pool {
 }
 
 // Constants
-const CUSTODIAN_ID =
-  process.env.VITE_CUSTODIAN_ID ||
-  "0x38fe43dd9aaff19d475ddb5f6d4657243b1428bbdf0ff797bdc1dac69986c093";
 const DEFAULT_DECIMALS = 9;
 const REFRESH_INTERVAL = 30000; // 30 seconds
 const MIN_SLIPPAGE = 0.001; // 0.1%
@@ -82,7 +73,6 @@ const Swap: React.FC = () => {
   );
   const [marketPrice, setMarketPrice] = useState<MarketPrice | null>(null);
   const [slippage, setSlippage] = useState<number>(DEFAULT_SLIPPAGE);
-
   // Utility functions
   const updateLastRefresh = useCallback(() => {
     setLastRefresh(new Date().toISOString().replace("T", " ").split(".")[0]);
@@ -91,15 +81,45 @@ const Swap: React.FC = () => {
   const formatBalance = (balance: bigint, decimals: number): string => {
     return (Number(balance) / Math.pow(10, decimals)).toFixed(decimals);
   };
-  // Data fetching and core functionality
+
+  // Core functionality
+  const calculateEstimatedOutput = useCallback(async () => {
+    if (!fromToken || !toToken || !amount || !account) return;
+
+    try {
+      const pool = findPool(fromToken.address, toToken.address);
+      if (!pool) {
+        setError("No liquidity pool found for this pair");
+        return;
+      }
+
+      const price = await deepBook.getCurrentPrice(pool.poolId);
+      if (!price) {
+        throw new Error("Failed to fetch current price");
+      }
+
+      setMarketPrice({
+        poolKey: pool.poolId,
+        price,
+        timestamp: Date.now(),
+      });
+
+      const outputAmount = parseFloat(amount) * price;
+      setEstimatedOutput(outputAmount.toFixed(toToken.decimals));
+    } catch (error) {
+      console.error("Error calculating estimated output:", error);
+      setError("Failed to calculate estimated output");
+    }
+  }, [fromToken, toToken, amount, account, deepBook]);
+
   const fetchPools = useCallback(async () => {
     setIsLoading(true);
     try {
-      const pools = await deepBook.getPools();
+      const poolsResponse = await deepBook.getPools();
       const poolsData: PoolWithTokens[] = [];
       const tokens = new Set<string>();
 
-      for (const pool of pools.data) {
+      for (const pool of poolsResponse.data) {
         if (!pool.data?.content) continue;
 
         const content = pool.data.content as any;
@@ -194,9 +214,8 @@ const Swap: React.FC = () => {
         quoteAsset: toToken.address,
       });
 
-      const result = await suiClient.executeTransactionBlock({
+      const result = await suiClient.signAndExecuteTransactionBlock({
         transactionBlock: tx,
-        requestType: "WaitForLocalExecution",
         options: {
           showEffects: true,
           showEvents: true,
@@ -315,7 +334,6 @@ const Swap: React.FC = () => {
 
     return () => clearInterval(intervalId);
   }, [fromToken, toToken, calculateEstimatedOutput]);
-
   // Render
   return (
     <div className="swap-container">

@@ -1,15 +1,11 @@
 /**
  * @file src/services/deepbook.ts
- * Updated Date: 2025-01-27 21:03:35
+ * Updated Date: 2025-01-27 21:33:40
  * Author: jake1318
  */
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import {
-  SuiClient,
-  SuiEventFilter,
-  PaginatedObjectsResponse,
-} from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui.js/client";
 
 export interface PoolState {
   type: string;
@@ -20,15 +16,6 @@ export interface PoolState {
   lpSupply: bigint;
   baseScale: number;
   quoteScale: number;
-}
-
-export interface CreateOrderParams {
-  poolId: string;
-  price: number;
-  quantity: number;
-  isBid: boolean;
-  baseAsset: string;
-  quoteAsset: string;
 }
 
 export interface SwapParams {
@@ -54,34 +41,6 @@ export class DeepBookService {
   }
 
   /**
-   * Create a transaction for placing a limit order
-   */
-  async createLimitOrder({
-    poolId,
-    price,
-    quantity,
-    isBid,
-    baseAsset,
-    quoteAsset,
-  }: CreateOrderParams): Promise<TransactionBlock> {
-    const tx = new TransactionBlock();
-
-    const [pool] = tx.moveCall({
-      target: `${this.moduleAddress}::clob_v2::create_limit_order`,
-      arguments: [
-        tx.pure(poolId),
-        tx.pure(price),
-        tx.pure(quantity),
-        tx.pure(isBid),
-        tx.pure(baseAsset),
-        tx.pure(quoteAsset),
-      ],
-    });
-
-    return tx;
-  }
-
-  /**
    * Create a transaction for market swap
    */
   async createMarketSwap({
@@ -93,7 +52,7 @@ export class DeepBookService {
   }: SwapParams): Promise<TransactionBlock> {
     const tx = new TransactionBlock();
 
-    const [pool] = tx.moveCall({
+    tx.moveCall({
       target: `${this.moduleAddress}::clob_v2::swap_exact_base_for_quote`,
       arguments: [
         tx.pure(poolId),
@@ -164,8 +123,8 @@ export class DeepBookService {
   /**
    * Get list of pools
    */
-  async getPools(): Promise<PaginatedObjectsResponse> {
-    return this.suiClient.getOwnedObjects({
+  async getPools() {
+    return this.suiClient.getAllObjects({
       filter: {
         StructType: `${this.moduleAddress}::clob_v2::Pool`,
       },
@@ -173,42 +132,6 @@ export class DeepBookService {
         showContent: true,
       },
     });
-  }
-
-  /**
-   * Calculate output amount for swap
-   */
-  calculateSwapOutput(
-    inputAmount: number,
-    poolBaseBalance: bigint,
-    poolQuoteBalance: bigint,
-    baseScale: number,
-    quoteScale: number
-  ): number {
-    const baseScaleBN = BigInt(Math.pow(10, baseScale));
-    const quoteScaleBN = BigInt(Math.pow(10, quoteScale));
-
-    const inputAmountBN = BigInt(Math.floor(inputAmount * Number(baseScaleBN)));
-
-    const numerator = inputAmountBN * poolQuoteBalance;
-    const denominator = poolBaseBalance + inputAmountBN;
-
-    const outputAmountBN = numerator / denominator;
-    return Number(outputAmountBN) / Number(quoteScaleBN);
-  }
-
-  /**
-   * Utility: Convert base units to decimal
-   */
-  baseUnitsToDecimal(amount: bigint, decimals: number): number {
-    return Number(amount) / Math.pow(10, decimals);
-  }
-
-  /**
-   * Utility: Convert decimal to base units
-   */
-  decimalToBaseUnits(amount: number, decimals: number): bigint {
-    return BigInt(Math.floor(amount * Math.pow(10, decimals)));
   }
 }
 
