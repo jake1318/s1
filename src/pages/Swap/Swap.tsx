@@ -1,12 +1,10 @@
-/**
- * @file src/pages/Swap/Swap.tsx
- * Updated Date: 2025-01-28 01:32:26
- * Author: jake1318
- */
-
 import { useState, useEffect, useCallback } from "react";
-import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
-import { DeepBookService } from "../../services/deepbook";
+import {
+  useCurrentAccount,
+  useSuiClient,
+  useSignAndExecuteTransaction,
+} from "@mysten/dapp-kit";
+import { DeepBookService } from "../../services/DeepBook";
 import "./Swap.css";
 
 // Types
@@ -52,6 +50,7 @@ const Swap: React.FC = () => {
   const suiClient = useSuiClient();
   const account = useCurrentAccount();
   const deepBook = new DeepBookService(suiClient as any);
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   // State management
   const [fromToken, setFromToken] = useState<TokenInfo | null>(null);
@@ -150,6 +149,7 @@ const Swap: React.FC = () => {
       setIsLoading(false);
     }
   }, [deepBook, updateLastRefresh]);
+
   const fetchTokenBalances = useCallback(async () => {
     if (!account) return;
 
@@ -201,12 +201,12 @@ const Swap: React.FC = () => {
       const baseUnits = BigInt(
         Math.floor(parseFloat(amount) * Math.pow(10, fromToken.decimals))
       );
-
       const minOutput = estimatedOutput
         ? Math.floor(parseFloat(estimatedOutput) * (1 - slippage))
         : 0;
 
-      const tx = await deepBook.createMarketSwap({
+      // Create the transaction block
+      const txb = await deepBook.createMarketSwap({
         poolId: pool.poolId,
         amount: Number(baseUnits),
         minOutput,
@@ -214,24 +214,31 @@ const Swap: React.FC = () => {
         quoteAsset: toToken.address,
       });
 
-      const result = await suiClient.signAndExecuteTransaction({
-        transaction: tx,
-        options: {
-          showEffects: true,
-          showEvents: true,
-          showInput: true,
-        },
-      });
+      // Serialize the transaction block
+      const serializedTxb = JSON.stringify(txb);
 
-      setAmount("");
-      setEstimatedOutput("");
-      await Promise.all([fetchTokenBalances(), fetchPools()]);
-
-      setError(`Swap successful! Transaction ID: ${result.digest}`);
+      // Sign and execute the transaction
+      signAndExecuteTransaction(
+        { transaction: serializedTxb },
+        {
+          onSuccess: (result) => {
+            setAmount("");
+            setEstimatedOutput("");
+            Promise.all([fetchTokenBalances(), fetchPools()]);
+            setError(`Swap successful! Transaction ID: ${result.digest}`);
+          },
+          onError: (error) => {
+            console.error("Swap error:", error);
+            setError("Swap failed. Please try again.");
+          },
+          onSettled: () => {
+            setIsLoading(false);
+          },
+        }
+      );
     } catch (error) {
       console.error("Swap error:", error);
       setError("Swap failed. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   }, [
@@ -245,6 +252,7 @@ const Swap: React.FC = () => {
     deepBook,
     fetchTokenBalances,
     fetchPools,
+    signAndExecuteTransaction,
   ]);
 
   // Helper functions
@@ -310,211 +318,143 @@ const Swap: React.FC = () => {
 
   // Effects
   useEffect(() => {
-    fetchPools();
-  }, [fetchPools]);
+    if (account) {
+      fetchPools();
+      fetchTokenBalances();
+    }
+  }, [account, fetchPools, fetchTokenBalances]);
 
   useEffect(() => {
     if (fromToken && toToken && amount) {
       calculateEstimatedOutput();
+    } else {
+      setEstimatedOutput("");
+      setMarketPrice(null);
     }
   }, [fromToken, toToken, amount, calculateEstimatedOutput]);
 
   useEffect(() => {
-    if (account && availableTokens.size > 0) {
-      fetchTokenBalances();
-    }
-  }, [account, availableTokens.size, fetchTokenBalances]);
+    if (!account) return;
 
-  useEffect(() => {
     const intervalId = setInterval(() => {
-      if (fromToken && toToken) {
-        calculateEstimatedOutput();
-      }
+      fetchPools();
+      fetchTokenBalances();
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [fromToken, toToken, calculateEstimatedOutput]);
+  }, [account, fetchPools, fetchTokenBalances]);
 
-  // Render
+  useEffect(() => {
+    if (!fromToken || !amount) return;
+
+    const balance = tokenBalances.get(fromToken.address);
+    if (!balance) return;
+
+    if (parseFloat(amount) > parseFloat(balance.formattedBalance)) {
+      setError("Insufficient balance");
+    } else {
+      setError(null);
+    }
+  }, [amount, fromToken, tokenBalances]);
+
   return (
     <div className="swap-container">
-      <div className="swap-box">
-        <h2>Swap Tokens</h2>
+      <h1>Swap Tokens</h1>
+      <div className="last-refresh">Last refreshed: {lastRefresh}</div>
 
-        {error && (
-          <div
-            className={`message ${
-              error.includes("successful") ? "success" : "error"
-            }`}
-          >
-            {error}
-          </div>
-        )}
-
-        <div className="last-update">Last updated: {lastRefresh} UTC</div>
-
-        {!account ? (
-          <div className="connect-message">
-            Please connect your wallet to continue
-          </div>
-        ) : (
-          <>
-            <div className="wallet-info">
-              <div>
-                Connected:{" "}
-                {`${account.address.slice(0, 6)}...${account.address.slice(
-                  -4
-                )}`}
-              </div>
-              {isLoadingBalances && (
-                <div className="loading-balances">Loading balances...</div>
-              )}
-            </div>
-
-            <div className="slippage-settings">
-              <label>Slippage Tolerance:</label>
-              <select
-                value={slippage}
-                onChange={(e) =>
-                  handleSlippageChange(parseFloat(e.target.value))
-                }
-                disabled={isLoading}
-              >
-                <option value={0.001}>0.1%</option>
-                <option value={0.005}>0.5%</option>
-                <option value={0.01}>1.0%</option>
-                <option value={0.02}>2.0%</option>
-              </select>
-            </div>
-
-            <div className="token-input">
-              <div className="token-select-header">
-                <label>From</label>
-                {fromToken && (
-                  <div className="token-balance">
-                    Balance: {getTokenBalance(fromToken.address)}{" "}
-                    {fromToken.symbol}
-                  </div>
-                )}
-              </div>
-              <select
-                value={fromToken?.address || ""}
-                onChange={(e) => handleFromTokenSelect(e.target.value)}
-                disabled={isLoading}
-              >
-                <option value="">Select token</option>
-                {Array.from(availableTokens).map((tokenAddress) => (
-                  <option key={tokenAddress} value={tokenAddress}>
-                    {tokenAddress.slice(0, 8)}
-                    {tokenBalances.get(tokenAddress)
-                      ? ` (${
-                          tokenBalances.get(tokenAddress)?.formattedBalance
-                        })`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-              <div className="input-with-max">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Amount"
-                  disabled={isLoading}
-                  min="0"
-                  step="0.000000001"
-                />
-                {fromToken && (
-                  <button
-                    className="max-button"
-                    onClick={handleMaxAmount}
-                    disabled={isLoading}
-                  >
-                    MAX
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="swap-arrow">↓</div>
-
-            <div className="token-input">
-              <div className="token-select-header">
-                <label>To</label>
-                {toToken && (
-                  <div className="token-balance">
-                    Balance: {getTokenBalance(toToken.address)} {toToken.symbol}
-                  </div>
-                )}
-              </div>
-              <select
-                value={toToken?.address || ""}
-                onChange={(e) => handleToTokenSelect(e.target.value)}
-                disabled={isLoading}
-              >
-                <option value="">Select token</option>
-                {Array.from(availableTokens).map((tokenAddress) => (
-                  <option key={tokenAddress} value={tokenAddress}>
-                    {tokenAddress.slice(0, 8)}
-                    {tokenBalances.get(tokenAddress)
-                      ? ` (${
-                          tokenBalances.get(tokenAddress)?.formattedBalance
-                        })`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-              {estimatedOutput && (
-                <div className="estimated-output">
-                  Estimated output: {estimatedOutput} {toToken?.symbol}
-                </div>
-              )}
-            </div>
-
-            {marketPrice && (
-              <div className="market-info">
-                <div>Market Price: {marketPrice.price.toFixed(6)}</div>
-                <div>
-                  Last Updated:{" "}
-                  {new Date(marketPrice.timestamp).toLocaleTimeString()}
-                </div>
-              </div>
-            )}
-
-            <button
-              className="swap-button"
-              onClick={executeSwap}
-              disabled={
-                isLoading ||
-                !fromToken ||
-                !toToken ||
-                !amount ||
-                (fromToken &&
-                  parseFloat(amount) >
-                    parseFloat(getTokenBalance(fromToken.address)))
-              }
-            >
-              {isLoading
-                ? "Processing..."
-                : !amount
-                ? "Enter amount"
-                : fromToken &&
-                  parseFloat(amount) >
-                    parseFloat(getTokenBalance(fromToken.address))
-                ? "Insufficient balance"
-                : "Swap"}
-            </button>
-
-            <button
-              onClick={fetchTokenBalances}
-              className="refresh-button"
-              disabled={isLoadingBalances}
-            >
-              {isLoadingBalances ? "Refreshing..." : "Refresh Balances"}
-            </button>
-          </>
-        )}
+      <div className="token-selector">
+        <label>From:</label>
+        <select
+          value={fromToken?.address || ""}
+          onChange={(e) => handleFromTokenSelect(e.target.value)}
+        >
+          <option value="">Select token</option>
+          {Array.from(availableTokens).map((token) => (
+            <option key={token} value={token}>
+              {token.slice(0, 8)}
+            </option>
+          ))}
+        </select>
+        <div className="balance">
+          Balance: {fromToken ? getTokenBalance(fromToken.address) : "0"}
+        </div>
       </div>
+
+      <div className="amount-input">
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Enter amount"
+          disabled={!fromToken || !toToken}
+        />
+        <button onClick={handleMaxAmount} disabled={!fromToken}>
+          MAX
+        </button>
+      </div>
+
+      <div className="token-selector">
+        <label>To:</label>
+        <select
+          value={toToken?.address || ""}
+          onChange={(e) => handleToTokenSelect(e.target.value)}
+        >
+          <option value="">Select token</option>
+          {Array.from(availableTokens).map((token) => (
+            <option
+              key={token}
+              value={token}
+              disabled={token === fromToken?.address}
+            >
+              {token.slice(0, 8)}
+            </option>
+          ))}
+        </select>
+        <div className="balance">
+          Balance: {toToken ? getTokenBalance(toToken.address) : "0"}
+        </div>
+      </div>
+
+      {estimatedOutput && (
+        <div className="estimated-output">
+          Estimated output: {estimatedOutput}
+        </div>
+      )}
+
+      {marketPrice && (
+        <div className="market-price">
+          Market Price: {marketPrice.price.toFixed(6)}
+        </div>
+      )}
+
+      <div className="slippage-settings">
+        <label>Slippage Tolerance:</label>
+        <input
+          type="number"
+          value={slippage * 100}
+          onChange={(e) => handleSlippageChange(Number(e.target.value) / 100)}
+          step="0.1"
+          min={MIN_SLIPPAGE * 100}
+          max="100"
+        />
+        <span>%</span>
+      </div>
+
+      <button
+        className="swap-button"
+        onClick={executeSwap}
+        disabled={
+          !account || !fromToken || !toToken || !amount || isLoading || !!error
+        }
+      >
+        {isLoading ? "Processing..." : "Swap"}
+      </button>
+
+      {error && <div className="error-message">{error}</div>}
+
+      {isLoadingBalances && (
+        <div className="loading-message">Loading balances...</div>
+      )}
     </div>
   );
 };
