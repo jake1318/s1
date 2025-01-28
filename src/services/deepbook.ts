@@ -1,6 +1,6 @@
 /**
  * @file src/services/deepbook.ts
- * Updated Date: 2025-01-27 21:33:40
+ * Updated Date: 2025-01-28 01:29:10
  * Author: jake1318
  */
 
@@ -125,16 +125,26 @@ export class DeepBookService {
    */
   async getPools() {
     try {
-      const response = await this.suiClient.getObjects({
+      // First get all pool IDs
+      const poolIds = await this.suiClient.getOwnedObjects({
+        owner: this.moduleAddress,
         filter: {
           StructType: `${this.moduleAddress}::clob_v2::Pool`,
         },
+        options: {
+          showType: true,
+        },
+      });
+
+      // Then use multiGetObjects to get the full data
+      const response = await this.suiClient.multiGetObjects({
+        ids: poolIds.data.map((obj) => obj.data!.objectId),
         options: {
           showContent: true,
         },
       });
 
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error fetching pools:", error);
       return [];

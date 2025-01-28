@@ -1,6 +1,6 @@
 /**
  * @file src/pages/Swap/Swap.tsx
- * Updated Date: 2025-01-27 21:35:07
+ * Updated Date: 2025-01-28 01:32:26
  * Author: jake1318
  */
 
@@ -51,7 +51,7 @@ const DEFAULT_SLIPPAGE = 0.01; // 1%
 const Swap: React.FC = () => {
   const suiClient = useSuiClient();
   const account = useCurrentAccount();
-  const deepBook = new DeepBookService(suiClient);
+  const deepBook = new DeepBookService(suiClient as any);
 
   // State management
   const [fromToken, setFromToken] = useState<TokenInfo | null>(null);
@@ -73,6 +73,7 @@ const Swap: React.FC = () => {
   );
   const [marketPrice, setMarketPrice] = useState<MarketPrice | null>(null);
   const [slippage, setSlippage] = useState<number>(DEFAULT_SLIPPAGE);
+
   // Utility functions
   const updateLastRefresh = useCallback(() => {
     setLastRefresh(new Date().toISOString().replace("T", " ").split(".")[0]);
@@ -119,7 +120,7 @@ const Swap: React.FC = () => {
       const poolsData: PoolWithTokens[] = [];
       const tokens = new Set<string>();
 
-      for (const pool of poolsResponse.data) {
+      for (const pool of poolsResponse) {
         if (!pool.data?.content) continue;
 
         const content = pool.data.content as any;
@@ -149,7 +150,6 @@ const Swap: React.FC = () => {
       setIsLoading(false);
     }
   }, [deepBook, updateLastRefresh]);
-
   const fetchTokenBalances = useCallback(async () => {
     if (!account) return;
 
@@ -214,8 +214,8 @@ const Swap: React.FC = () => {
         quoteAsset: toToken.address,
       });
 
-      const result = await suiClient.signAndExecuteTransactionBlock({
-        transactionBlock: tx,
+      const result = await suiClient.signAndExecuteTransaction({
+        transaction: tx,
         options: {
           showEffects: true,
           showEvents: true,
@@ -334,6 +334,7 @@ const Swap: React.FC = () => {
 
     return () => clearInterval(intervalId);
   }, [fromToken, toToken, calculateEstimatedOutput]);
+
   // Render
   return (
     <div className="swap-container">
