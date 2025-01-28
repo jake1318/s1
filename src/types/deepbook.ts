@@ -4,8 +4,6 @@
  * Author: jake1318
  */
 
-import type { SuiObjectResponse } from "@mysten/sui.js/client";
-
 export interface OrderParams {
   poolKey: string;
   price: number;

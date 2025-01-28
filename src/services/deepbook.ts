@@ -124,14 +124,21 @@ export class DeepBookService {
    * Get list of pools
    */
   async getPools() {
-    return this.suiClient.getAllObjects({
-      filter: {
-        StructType: `${this.moduleAddress}::clob_v2::Pool`,
-      },
-      options: {
-        showContent: true,
-      },
-    });
+    try {
+      const response = await this.suiClient.getObjects({
+        filter: {
+          StructType: `${this.moduleAddress}::clob_v2::Pool`,
+        },
+        options: {
+          showContent: true,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching pools:", error);
+      return [];
+    }
   }
 }
 
