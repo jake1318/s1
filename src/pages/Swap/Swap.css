@@ -1,157 +1,253 @@
-/* Swap Page Styles */
+/**
+ * @file Swap.css
+ * @description Styles for the Swap component
+ * @author jake1318
+ * @updated 2025-01-29 01:45:48
+ */
 
+:root {
+  --header-height: 80px;
+  --footer-height: 60px;
+  --primary-color: #00a3ff;
+  --secondary-color: #87cefa;
+  --text-color: #e0e0e0;
+  --card-bg: rgba(20, 20, 20, 0.95);
+  --card-border: #00a3ff;
+}
+
+/* Container Layout */
 .swap-container {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: var(--footer-height);
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 2rem;
-  min-height: 100vh;
+  align-items: center;
   background: linear-gradient(135deg, #1e1e1e, #000000);
-  color: #e0e0e0;
-  border: 2px solid #00a3ff; /* Neon blue border */
-  border-radius: 12px; /* Rounded corners */
-  box-shadow: 0 0 20px rgba(0, 230, 255, 0.5); /* Glowing shadow */
 }
 
-.swap-container h1 {
-  font-size: 2.5rem;
+.swap-content {
+  width: 100%;
+  max-width: 440px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.swap-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 0 20px rgba(0, 163, 255, 0.15);
+}
+
+/* Title */
+.swap-card h1 {
+  font-size: 1.75rem;
+  color: var(--primary-color);
+  text-align: center;
   margin-bottom: 1.5rem;
-  color: #00a3ff;
-  text-shadow: 0 0 15px #00a3ff;
+  text-shadow: 0 0 10px rgba(0, 163, 255, 0.5);
 }
 
-.last-refresh {
-  font-size: 0.9rem;
-  color: #87cefa;
+/* Token Section Styles */
+.token-section {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(0, 163, 255, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
   margin-bottom: 1rem;
 }
 
-.token-selector {
-  width: 100%;
-  max-width: 600px;
-  margin-bottom: 1.5rem;
+/* Token Header */
+.token-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0 0.5rem;
 }
 
-.token-selector label {
-  font-weight: bold;
-  color: #00ffff;
-}
-
-.token-selector select {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #00a3ff;
-  border-radius: 8px;
-  background: rgba(20, 20, 20, 0.8);
-  color: #e0e0e0;
-  font-size: 1rem;
-}
-
-.token-selector select:focus {
-  outline: none;
-  border-color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+.token-header label {
+  color: #87cefa;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .balance {
-  font-size: 0.9rem;
   color: #87cefa;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
-.amount-input {
-  width: 100%;
-  max-width: 600px;
+/* Input Group */
+.input-group {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.amount-input input {
+.input-group input {
   flex: 1;
-  padding: 0.8rem;
-  border: 1px solid #00a3ff;
-  border-radius: 8px;
-  background: rgba(20, 20, 20, 0.8);
-  color: #e0e0e0;
-  font-size: 1rem;
-}
-
-.amount-input input:focus {
-  outline: none;
-  border-color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-}
-
-.amount-input button {
-  padding: 0.8rem 1.5rem;
+  background: transparent;
   border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  text-align: right;
+}
+
+.input-group input:focus {
+  outline: none;
+}
+
+.input-group input::placeholder {
+  color: rgba(224, 224, 224, 0.5);
+}
+
+/* Max Button */
+.max-btn {
+  background: rgba(0, 163, 255, 0.15);
+  border: 1px solid var(--primary-color);
   border-radius: 8px;
-  background: #00a3ff;
-  color: #1a1a1a;
-  font-weight: bold;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(0, 230, 255, 0.6);
 }
 
-.amount-input button:hover {
-  background: #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+.max-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: #1a1a1a;
 }
 
-.estimated-output,
-.market-price {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-  color: #87cefa;
-  text-shadow: 0 0 10px #87cefa;
+.max-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.slippage-settings {
+/* Token Select */
+.token-select {
   width: 100%;
-  max-width: 600px;
+  padding: 12px;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid var(--primary-color);
+  border-radius: 12px;
+  color: var(--text-color);
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300a3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.token-select:focus {
+  outline: none;
+  border-color: #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.token-select option {
+  background: rgba(20, 20, 20, 0.95);
+  color: var(--text-color);
+  padding: 12px;
+}
+
+/* Swap Direction Button */
+.swap-direction-button {
+  width: 40px;
+  height: 40px;
+  background: var(--card-bg);
+  border: 1px solid var(--primary-color);
+  border-radius: 50%;
+  margin: -10px auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.swap-direction-button span {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.swap-direction-button:hover {
+  background: var(--primary-color);
+  box-shadow: 0 0 15px rgba(0, 163, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.swap-direction-button:hover span {
+  color: #1a1a1a;
+}
+
+/* Price Info */
+.price-info {
+  background: rgba(0, 163, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  color: #87cefa;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* Settings Section */
+.settings-section {
+  background: rgba(30, 30, 30, 0.5);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* Slippage Settings */
+.slippage-settings {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .slippage-settings input {
-  width: 4rem;
-  padding: 0.5rem;
-  border: 1px solid #00a3ff;
-  border-radius: 8px;
+  width: 60px;
+  padding: 0.4rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
   background: rgba(20, 20, 20, 0.8);
-  color: #e0e0e0;
+  color: var(--text-color);
   text-align: center;
 }
 
-.slippage-settings input:focus {
-  outline: none;
-  border-color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-}
-
+/* Swap Button */
 .swap-button {
-  padding: 1rem 2rem;
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
   border: none;
-  border-radius: 8px;
-  background: #00a3ff;
+  border-radius: 12px;
+  background: var(--primary-color);
   color: #1a1a1a;
   font-weight: bold;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(0, 230, 255, 0.6);
 }
 
 .swap-button:hover:not(:disabled) {
   background: #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
 }
 
 .swap-button:disabled {
@@ -159,15 +255,31 @@
   cursor: not-allowed;
 }
 
+/* Messages */
 .error-message {
   color: #ff4444;
   text-align: center;
   margin-top: 1rem;
-  font-weight: bold;
+  font-size: 0.9rem;
 }
 
 .loading-message {
   color: #87cefa;
   text-align: center;
   margin-top: 1rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 480px) {
+  .swap-content {
+    padding: 0 0.5rem;
+  }
+
+  .swap-card {
+    padding: 1rem;
+  }
+
+  .token-section {
+    padding: 0.75rem;
+  }
 }

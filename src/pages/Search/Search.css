@@ -1,50 +1,68 @@
 /**
  * @file Search.css
- * Updated Date: 2025-01-27 05:36:20
+ * Updated Date: 2025-01-29 00:43:12
  * Author: jake1318
  */
 
+/* Root Variables */
+:root {
+  --header-height: 80px;
+  --footer-height: 60px;
+  --primary-color: #00a3ff;
+  --secondary-color: #87cefa;
+  --text-color: cyan;
+}
+
 /* Root Container */
 .mind-search {
-  min-height: calc(100vh - var(--header-height));
-  width: 100%;
-  background: linear-gradient(135deg, #1e1e1e, #000000);
   position: fixed;
   top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1e1e1e, #000000);
   overflow-y: auto;
-  padding: 2rem;
 }
 
 /* Main Content Container */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px;
+  flex: 1;
+  padding: 2rem;
   background: rgba(30, 30, 30, 0.95);
-  border: 1px solid var(--primary-color);
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 230, 255, 0.5);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
 }
 
 /* Search Header */
 .search-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(0, 230, 255, 0.2);
 }
 
 .meta-info {
+  margin-top: 1rem;
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.utc-time,
+/* Ensure "Mind Search" title is cyan */
+.title {
+  font-size: 2.5rem;
+  margin: 0;
+  color: cyan !important; /* Override any conflicting styles */
+  text-shadow: 0 0 10px cyan; /* Adds a glowing effect */
+  font-family: "Orbitron", sans-serif;
+  font-weight: bold;
+  text-align: center;
+}
+
 .wallet-info {
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
@@ -53,18 +71,10 @@
   border: 1px solid var(--primary-color);
 }
 
-/* Title and Description */
-.title {
-  font-size: 2.5rem;
-  text-align: left;
-  margin: 0;
-  text-shadow: 0 0 10px var(--secondary-color);
-  font-family: "Orbitron", sans-serif;
-}
-
+/* Description */
 .description {
   text-align: center;
-  color: #87cefa;
+  color: #00a3ff;
   margin-bottom: 2rem;
   font-size: 1.2rem;
   text-shadow: 0 0 5px #87cefa;
@@ -75,6 +85,7 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .search-type {
@@ -95,11 +106,16 @@
 
 /* Search Box */
 .search-box {
+  position: relative;
+  z-index: 1;
+  margin-top: 1rem;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .search-input {
   flex: 1;
+  width: 100%;
   padding: 1rem;
   border: 1px solid var(--primary-color);
   border-radius: 8px;
@@ -127,6 +143,25 @@
   display: grid;
   gap: 2rem;
   margin-top: 2rem;
+  width: 100%;
+  max-height: calc(100vh - var(--header-height) - 300px);
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+/* Scrollbar Styling */
+.results-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.results-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.results-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
 }
 
 /* AI Response Section */
@@ -143,7 +178,7 @@
   color: #e0e0e0;
 }
 
-/* Video Grid Enhancements */
+/* Video Grid */
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -162,7 +197,7 @@
 
 .video-card img {
   width: 100%;
-  height: 158px; /* 16:9 aspect ratio */
+  height: 158px;
   object-fit: cover;
   border-bottom: 1px solid var(--primary-color);
 }
@@ -181,7 +216,7 @@
   color: #a0a0a0;
 }
 
-/* Web Results Enhancement */
+/* Web Results */
 .web-links {
   display: grid;
   gap: 1rem;
@@ -198,7 +233,7 @@
   gap: 0.5rem;
 }
 
-/* Loading Animation Enhancement */
+/* Loading Animation */
 .loading-indicator {
   display: flex;
   flex-direction: column;
@@ -216,7 +251,13 @@
   animation: spin 1s linear infinite;
 }
 
-/* Error Message Enhancement */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
 .error-message {
   background: rgba(255, 68, 68, 0.1);
   border: 1px solid #ff4444;
@@ -227,8 +268,24 @@
   margin-top: 1rem;
 }
 
-/* Responsive Enhancements */
+/* Footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height);
+  background: rgba(20, 20, 20, 0.95);
+  border-top: 1px solid var(--primary-color);
+  z-index: 10;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
   .search-header {
     flex-direction: column;
     gap: 1rem;
@@ -239,7 +296,6 @@
     width: 100%;
   }
 
-  .utc-time,
   .wallet-info {
     width: 100%;
     text-align: center;
@@ -265,13 +321,18 @@
   }
 }
 
-/* Print Styles Enhancement */
+/* Print Styles */
 @media print {
   .mind-search {
     position: relative;
-    padding: 0;
+    top: 0;
     background: white;
     color: black;
+  }
+
+  .results-container {
+    max-height: none;
+    overflow: visible;
   }
 
   .search-controls,
@@ -288,4 +349,9 @@
   .video-card img {
     display: none;
   }
+
+  .footer {
+    display: none;
+  }
 }
+/* Ensure the title is cyan */

@@ -8,11 +8,17 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-left">
+      {/* Logo Section */}
+      <div className="navbar-logo">
+        <Link to="/" className="logo-container">
+          <img src="/Design_2.png" alt="Sui Mind Logo" className="logo-image" />
+          <span className="logo-text">SuiMind</span>
+        </Link>
+      </div>
+
+      {/* Navigation Links Section */}
+      <div className="navbar-center">
         <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
           <li>
             <Link to="/search">Search</Link>
           </li>
@@ -28,6 +34,7 @@ const Navbar: React.FC = () => {
         </ul>
       </div>
 
+      {/* Wallet Section */}
       <div className="navbar-right">
         <div className="wallet-section">
           {account && (
@@ -39,7 +46,10 @@ const Navbar: React.FC = () => {
               </span>
             </div>
           )}
-          <ConnectButton connectText="Connect Wallet" />
+          <ConnectButton
+            className="connect-wallet-button"
+            connectText="Connect Wallet"
+          />
         </div>
       </div>
     </nav>

@@ -1,3 +1,12 @@
+/**
+ * @file Swap.tsx
+ * @description Mind Swap component for decentralized token exchange
+ * @author jake1318
+ * @copyright Mind Protocol 2025
+ * @version 1.0.0
+ * @updated 2025-01-29 01:36:17
+ */
+
 import { useState, useEffect, useCallback } from "react";
 import {
   useCurrentAccount,
@@ -46,7 +55,10 @@ const REFRESH_INTERVAL = 30000; // 30 seconds
 const MIN_SLIPPAGE = 0.001; // 0.1%
 const DEFAULT_SLIPPAGE = 0.01; // 1%
 
-const Swap: React.FC = () => {
+/**
+ * SwapPage component handles token swapping functionality
+ */
+const SwapPage: React.FC = () => {
   const suiClient = useSuiClient();
   const account = useCurrentAccount();
   const deepBook = new DeepBookService(suiClient as any);
@@ -67,20 +79,33 @@ const Swap: React.FC = () => {
     new Map()
   );
   const [isLoadingBalances, setIsLoadingBalances] = useState(false);
-  const [lastRefresh, setLastRefresh] = useState<string>(
-    new Date().toISOString().replace("T", " ").split(".")[0]
-  );
   const [marketPrice, setMarketPrice] = useState<MarketPrice | null>(null);
   const [slippage, setSlippage] = useState<number>(DEFAULT_SLIPPAGE);
 
   // Utility functions
-  const updateLastRefresh = useCallback(() => {
-    setLastRefresh(new Date().toISOString().replace("T", " ").split(".")[0]);
-  }, []);
-
   const formatBalance = (balance: bigint, decimals: number): string => {
     return (Number(balance) / Math.pow(10, decimals)).toFixed(decimals);
   };
+
+  // Helper functions
+  const findPool = useCallback(
+    (baseAsset: string, quoteAsset: string): PoolWithTokens | undefined => {
+      return pools.find(
+        (pool) =>
+          (pool.baseAsset === baseAsset && pool.quoteAsset === quoteAsset) ||
+          (pool.baseAsset === quoteAsset && pool.quoteAsset === baseAsset)
+      );
+    },
+    [pools]
+  );
+
+  const getTokenBalance = useCallback(
+    (tokenAddress: string): string => {
+      const balance = tokenBalances.get(tokenAddress);
+      return balance ? balance.formattedBalance : "0";
+    },
+    [tokenBalances]
+  );
 
   // Core functionality
   const calculateEstimatedOutput = useCallback(async () => {
@@ -141,14 +166,13 @@ const Swap: React.FC = () => {
 
       setAvailableTokens(tokens);
       setPools(poolsData);
-      updateLastRefresh();
     } catch (error) {
       console.error("Error fetching pools:", error);
       setError("Failed to fetch pools");
     } finally {
       setIsLoading(false);
     }
-  }, [deepBook, updateLastRefresh]);
+  }, [deepBook]);
 
   const fetchTokenBalances = useCallback(async () => {
     if (!account) return;
@@ -174,14 +198,13 @@ const Swap: React.FC = () => {
       }
 
       setTokenBalances(newBalances);
-      updateLastRefresh();
     } catch (error) {
       console.error("Error fetching token balances:", error);
       setError("Failed to fetch token balances");
     } finally {
       setIsLoadingBalances(false);
     }
-  }, [account, suiClient, updateLastRefresh]);
+  }, [account, suiClient]);
 
   const executeSwap = useCallback(async () => {
     if (!account || !fromToken || !toToken || !amount) {
@@ -248,32 +271,11 @@ const Swap: React.FC = () => {
     amount,
     estimatedOutput,
     slippage,
-    suiClient,
     deepBook,
     fetchTokenBalances,
     fetchPools,
     signAndExecuteTransaction,
   ]);
-
-  // Helper functions
-  const findPool = useCallback(
-    (baseAsset: string, quoteAsset: string): PoolWithTokens | undefined => {
-      return pools.find(
-        (pool) =>
-          (pool.baseAsset === baseAsset && pool.quoteAsset === quoteAsset) ||
-          (pool.baseAsset === quoteAsset && pool.quoteAsset === baseAsset)
-      );
-    },
-    [pools]
-  );
-
-  const getTokenBalance = useCallback(
-    (tokenAddress: string): string => {
-      const balance = tokenBalances.get(tokenAddress);
-      return balance ? balance.formattedBalance : "0";
-    },
-    [tokenBalances]
-  );
 
   // Event handlers
   const handleFromTokenSelect = useCallback((address: string) => {
@@ -359,104 +361,131 @@ const Swap: React.FC = () => {
 
   return (
     <div className="swap-container">
-      <h1>Swap Tokens</h1>
-      <div className="last-refresh">Last refreshed: {lastRefresh}</div>
+      <div className="swap-content">
+        <div className="swap-card">
+          <h1>Mind Swap</h1>
 
-      <div className="token-selector">
-        <label>From:</label>
-        <select
-          value={fromToken?.address || ""}
-          onChange={(e) => handleFromTokenSelect(e.target.value)}
-        >
-          <option value="">Select token</option>
-          {Array.from(availableTokens).map((token) => (
-            <option key={token} value={token}>
-              {token.slice(0, 8)}
-            </option>
-          ))}
-        </select>
-        <div className="balance">
-          Balance: {fromToken ? getTokenBalance(fromToken.address) : "0"}
-        </div>
-      </div>
-
-      <div className="amount-input">
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount"
-          disabled={!fromToken || !toToken}
-        />
-        <button onClick={handleMaxAmount} disabled={!fromToken}>
-          MAX
-        </button>
-      </div>
-
-      <div className="token-selector">
-        <label>To:</label>
-        <select
-          value={toToken?.address || ""}
-          onChange={(e) => handleToTokenSelect(e.target.value)}
-        >
-          <option value="">Select token</option>
-          {Array.from(availableTokens).map((token) => (
-            <option
-              key={token}
-              value={token}
-              disabled={token === fromToken?.address}
+          <div className="token-section">
+            <div className="token-header">
+              <label>From:</label>
+              <span className="balance">
+                Balance:{" "}
+                {fromToken ? getTokenBalance(fromToken.address) : "0.00"}
+              </span>
+            </div>
+            <div className="input-group">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.0"
+                disabled={!fromToken || !toToken}
+              />
+              <button
+                onClick={handleMaxAmount}
+                disabled={!fromToken}
+                className="max-btn"
+              >
+                MAX
+              </button>
+            </div>
+            <select
+              className="token-select"
+              value={fromToken?.address || ""}
+              onChange={(e) => handleFromTokenSelect(e.target.value)}
             >
-              {token.slice(0, 8)}
-            </option>
-          ))}
-        </select>
-        <div className="balance">
-          Balance: {toToken ? getTokenBalance(toToken.address) : "0"}
+              <option value="">Select Token</option>
+              {Array.from(availableTokens).map((token) => (
+                <option key={token} value={token}>
+                  {token.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="swap-direction-button">
+            <span>↓</span>
+          </div>
+
+          <div className="token-section">
+            <div className="token-header">
+              <label>To:</label>
+              <span className="balance">
+                Balance: {toToken ? getTokenBalance(toToken.address) : "0.00"}
+              </span>
+            </div>
+            <div className="input-group">
+              <input
+                type="number"
+                value={estimatedOutput}
+                readOnly
+                placeholder="0.0"
+              />
+            </div>
+            <select
+              className="token-select"
+              value={toToken?.address || ""}
+              onChange={(e) => handleToTokenSelect(e.target.value)}
+            >
+              <option value="">Select Token</option>
+              {Array.from(availableTokens).map((token) => (
+                <option
+                  key={token}
+                  value={token}
+                  disabled={token === fromToken?.address}
+                >
+                  {token.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {marketPrice && (
+            <div className="price-info">
+              Market Price: {marketPrice.price.toFixed(6)}
+            </div>
+          )}
+
+          <div className="settings-section">
+            <div className="slippage-settings">
+              <label>Slippage Tolerance:</label>
+              <input
+                type="number"
+                value={slippage * 100}
+                onChange={(e) =>
+                  handleSlippageChange(Number(e.target.value) / 100)
+                }
+                step="0.1"
+                min={MIN_SLIPPAGE * 100}
+                max="100"
+              />
+              <span>%</span>
+            </div>
+          </div>
+
+          <button
+            className="swap-button"
+            onClick={executeSwap}
+            disabled={
+              !account ||
+              !fromToken ||
+              !toToken ||
+              !amount ||
+              isLoading ||
+              !!error
+            }
+          >
+            {isLoading ? "Processing..." : "Swap"}
+          </button>
+
+          {error && <div className="error-message">{error}</div>}
+          {isLoadingBalances && (
+            <div className="loading-message">Loading balances...</div>
+          )}
         </div>
       </div>
-
-      {estimatedOutput && (
-        <div className="estimated-output">
-          Estimated output: {estimatedOutput}
-        </div>
-      )}
-
-      {marketPrice && (
-        <div className="market-price">
-          Market Price: {marketPrice.price.toFixed(6)}
-        </div>
-      )}
-
-      <div className="slippage-settings">
-        <label>Slippage Tolerance:</label>
-        <input
-          type="number"
-          value={slippage * 100}
-          onChange={(e) => handleSlippageChange(Number(e.target.value) / 100)}
-          step="0.1"
-          min={MIN_SLIPPAGE * 100}
-          max="100"
-        />
-        <span>%</span>
-      </div>
-
-      <button
-        className="swap-button"
-        onClick={executeSwap}
-        disabled={
-          !account || !fromToken || !toToken || !amount || isLoading || !!error
-        }
-      >
-        {isLoading ? "Processing..." : "Swap"}
-      </button>
-
-      {error && <div className="error-message">{error}</div>}
-
-      {isLoadingBalances && (
-        <div className="loading-message">Loading balances...</div>
-      )}
     </div>
   );
 };
 
-export default Swap;
+export default SwapPage;

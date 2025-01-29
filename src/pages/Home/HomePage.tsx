@@ -64,7 +64,11 @@ const HomePage: React.FC = () => {
               className="social-icon"
             >
               Follow us on
-              <img src="/x-logo.png" alt="X Logo" className="x-logo" />
+              <img
+                src="/assets/images/x-logo.svg"
+                alt="X Logo"
+                className="x-logo"
+              />
             </a>
           </div>
         </div>
@@ -88,9 +92,7 @@ const HomePage: React.FC = () => {
             ></textarea>
             <button type="submit">Send</button>
           </form>
-          <div className="form-footer">
-            <p className="timestamp">Last Updated: 2025-01-28 06:46:52 UTC</p>
-          </div>
+          <div className="form-footer"></div>
         </div>
       </section>
     </main>

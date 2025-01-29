@@ -1,0 +1,21 @@
+{
+  "name": "Sui Mind",
+  "short_name": "Sui Mind",
+  "description": "Revolutionizing AI Applications on the Sui Network",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#252525",
+  "theme_color": "#00a3ff",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

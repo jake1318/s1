@@ -6,10 +6,6 @@ import "./Dex.css";
 
 const Dex: React.FC = () => {
   const account = useCurrentAccount();
-  const currentUTCTime = new Date()
-    .toISOString()
-    .replace("T", " ")
-    .split(".")[0];
 
   return (
     <div className="dex-container">
@@ -18,7 +14,6 @@ const Dex: React.FC = () => {
           <h1>DEX Trading Platform</h1>
           <div className="status-info">
             <span className="status-badge">Coming Soon</span>
-            <span className="time-badge">{currentUTCTime} UTC</span>
           </div>
         </div>
 

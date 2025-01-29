@@ -1,4 +1,3 @@
-// src/pages/Search/Search.tsx
 import React, { useState } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import "./Search.css";
@@ -20,16 +19,11 @@ interface SearchResults {
 }
 
 const SearchPage: React.FC = () => {
-  // Changed to SearchPage to match import
   const account = useCurrentAccount();
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResults | null>(null);
-  const currentUTCTime = new Date()
-    .toISOString()
-    .replace("T", " ")
-    .split(".")[0];
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +67,6 @@ const SearchPage: React.FC = () => {
         <div className="search-header">
           <h1 className="title">Mind Search</h1>
           <div className="meta-info">
-            <span className="utc-time">{currentUTCTime} UTC</span>
             {account && (
               <span className="wallet-info">
                 Wallet:{" "}
@@ -188,4 +181,4 @@ const SearchPage: React.FC = () => {
   );
 };
 
-export default SearchPage; // Changed to match import requirements
+export default SearchPage;
