@@ -1,10 +1,17 @@
+/**
+ * @file HomePage.tsx
+ * @description Home page component for Sui Mind
+ * @author jake1318
+ * @updated 2025-01-29 02:29:00 UTC
+ */
+
 import React from "react";
 import "./HomePage.css";
 
 const HomePage: React.FC = () => {
   return (
     <main>
-      <section id="home" className="hero">
+      <section id="home" className="home-hero">
         <h1>Sui Mind - AI Meets Blockchain</h1>
         <p>Revolutionizing AI Applications on the Sui Network</p>
         <a href="#features" className="cta-button">
@@ -64,11 +71,17 @@ const HomePage: React.FC = () => {
               className="social-icon"
             >
               Follow us on
-              <img
-                src="/assets/images/x-logo.svg"
-                alt="X Logo"
+              <svg
                 className="x-logo"
-              />
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                />
+              </svg>
             </a>
           </div>
         </div>

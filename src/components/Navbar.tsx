@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
       <div className="navbar-logo">
         <Link to="/" className="logo-container">
           <img src="/Design_2.png" alt="Sui Mind Logo" className="logo-image" />
-          <span className="logo-text">SuiMind</span>
+          <span className="logo-text">Sui Mind</span>
         </Link>
       </div>
 

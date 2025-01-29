@@ -1,3 +1,10 @@
+/**
+ * @file Navbar.css
+ * @description Navigation bar styles for Sui Mind
+ * @author jake1318
+ * @updated 2025-01-29 02:35:13 UTC
+ */
+
 /* Navbar Styles - Updated */
 .navbar {
   position: fixed;
@@ -40,7 +47,7 @@
 .logo-text {
   font-family: "Orbitron", sans-serif;
   font-size: 1.2rem;
-  color: cyan;
+  color: #00a3ff; /* Updated to match new color scheme */
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
@@ -70,7 +77,7 @@
 }
 
 .navbar-center a {
-  color: cyan;
+  color: #00a3ff; /* Updated to requested color */
   text-decoration: none;
   font-family: "Orbitron", sans-serif;
   font-size: 1rem;
@@ -82,7 +89,7 @@
 }
 
 .navbar-center a:hover {
-  color: #00ffff;
+  color: cyan; /* Updated hover color */
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
   background: rgba(0, 163, 255, 0.1);
 }
@@ -90,8 +97,8 @@
 /* Wallet Button Styles */
 .connect-wallet-button {
   background: transparent !important;
-  border: 2px solid cyan !important;
-  color: cyan !important;
+  border: 2px solid #00a3ff !important; /* Updated to match new color scheme */
+  color: #00a3ff !important; /* Updated to match new color scheme */
   font-family: "Orbitron", sans-serif !important;
   font-size: 0.9rem !important;
   font-weight: 500 !important;
@@ -122,7 +129,7 @@
 }
 
 .connect-wallet-button:hover span {
-  color: #87cefa !important;
+  color: cyan !important; /* Updated to match new hover color */
 }
 
 /* Remove unwanted white box */
@@ -143,3 +150,5 @@
     max-width: 300px !important;
   }
 }
+
+/* Last updated by jake1318 on 2025-01-29 02:35:13 UTC */

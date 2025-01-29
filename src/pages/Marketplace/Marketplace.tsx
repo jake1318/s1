@@ -11,7 +11,6 @@ const MarketplacePage: React.FC = () => {
       {/* Coming Soon Banner */}
       <div className="coming-soon-banner">
         <span className="banner-text">Coming Soon</span>
-        <span className="utc-time">UTC: 2025-01-27 05:25:36</span>
       </div>
 
       <main>
