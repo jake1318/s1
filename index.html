@@ -2,8 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/Design_2.png" />
+
+    <!-- Favicons and App Icons -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/icon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/icon-512x512.png"
+    />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
 
     <!-- Primary Meta Tags -->
     <title>Sui Mind - AI Meets Blockchain</title>
@@ -42,7 +56,7 @@
     />
 
     <!-- Canonical URL -->
-    <meta rel="canonical" href="https://suimind.io/" />
+    <link rel="canonical" href="https://suimind.io/" />
 
     <!-- Robots -->
     <meta name="robots" content="index, follow" />
@@ -55,12 +69,16 @@
       rel="stylesheet"
     />
 
-    <!-- Additional Meta Information -->
+    <!-- PWA Meta Tags -->
     <meta name="author" content="Sui Mind Team" />
     <meta name="application-name" content="Sui Mind" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Sui Mind" />
+    <meta name="msapplication-TileColor" content="#00a3ff" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="format-detection" content="telephone=no" />
 
     <!-- Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -68,10 +86,12 @@
     <!-- Script -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Preload Critical Assets -->
-    <link rel="preload" href="/Design_2.png" as="image" />
+    <!-- Critical Assets -->
+    <link rel="preload" href="/icon-192x192.png" as="image" />
+    <link rel="preload" href="/icon-512x512.png" as="image" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
   </body>
 </html>
