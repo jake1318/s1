@@ -12,7 +12,17 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
+    assetsInlineLimit: 0, // Ensures all assets (icons, images) are kept as files
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "src/main.tsx"), // Ensure main.tsx is included
+      },
+      output: {
+        assetFileNames: "assets/[name]-[hash][extname]", // Keeps assets properly named
+      },
+    },
   },
+  publicDir: "public", // Ensures public assets like icons are copied
   server: {
     port: 3000,
     host: true,
