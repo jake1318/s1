@@ -15,7 +15,7 @@ export default defineConfig({
     assetsInlineLimit: 0, // Ensures all assets (icons, images) are kept as files
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, "src/main.tsx"), // Ensure main.tsx is included
+        main: path.resolve(__dirname, "index.html"), // Ensure index.html is included as entry
       },
       output: {
         assetFileNames: "assets/[name]-[hash][extname]", // Keeps assets properly named
